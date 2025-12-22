@@ -1,4 +1,5 @@
 import { Routes, Route, Navigate } from 'react-router-dom'
+import MainLayout from './components/layout/MainLayout' // Importamos el Layout
 
 import Landing from './pages/Landing'
 import Login from './pages/Login'
@@ -7,20 +8,22 @@ import Clients from './pages/Clients'
 
 function App() {
   return (
-    <div className="min-h-screen bg-black text-white">
-      <Routes>
-        {/* Rutas Públicas */}
-        <Route path="/" element={<Landing />} />
-        <Route path="/login" element={<Login />} />
+    // Quitamos el div wrapper global para que cada página controle su fondo
+    <Routes>
+      {/* 1. Rutas Públicas (Sin Sidebar) */}
+      <Route path="/" element={<Landing />} />
+      <Route path="/login" element={<Login />} />
 
-        {/* Rutas Privadas (Futuro Dashboard) */}
+      {/* 2. Rutas Privadas (Con Sidebar) */}
+      {/* ESTA ES LA CLAVE: Todo lo que esté aquí dentro tendrá Sidebar */}
+      <Route element={<MainLayout />}>
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/clients" element={<Clients />} />
+      </Route>
 
-        {/* Redirección: Si escriben cualquier ruta rara, mandar al inicio */}
-        <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
-    </div>
+      {/* 3. Redirección si la ruta no existe */}
+      <Route path="*" element={<Navigate to="/" replace />} />
+    </Routes>
   )
 }
 
