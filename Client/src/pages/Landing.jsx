@@ -1,8 +1,8 @@
-const Login = () => {
+const Landing = () => {
   return (
     <div className="flex h-screen items-center justify-center bg-gray-900 text-white">
-      <h1 className="text-3xl font-bold"> Login Page</h1>
+      <h1 className="text-3xl font-bold"> Landing Page</h1>
     </div>
   )
 }
-export default Login
+export default Landing
