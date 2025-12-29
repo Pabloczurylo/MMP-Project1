@@ -1,6 +1,5 @@
 import { Routes, Route, Navigate } from 'react-router-dom'
-import MainLayout from './components/layout/MainLayout' // Importamos el Layout
-
+import MainLayout from './components/layout/MainLayout' 
 import Landing from './pages/Landing'
 import Login from './pages/Login'
 import Dashboard from './pages/Dashboard'
