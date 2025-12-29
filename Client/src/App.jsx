@@ -4,6 +4,7 @@ import Landing from './pages/Landing'
 import Login from './pages/Login'
 import Dashboard from './pages/Dashboard'
 import Clients from './pages/Clients'
+import ClientForm from './pages/ClientForm'
 
 function App() {
   return (
@@ -18,6 +19,7 @@ function App() {
       <Route element={<MainLayout />}>
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/clients" element={<Clients />} />
+        <Route path="/clients/new" element={<ClientForm />} />
       </Route>
 
       {/* 3. Redirección si la ruta no existe */}

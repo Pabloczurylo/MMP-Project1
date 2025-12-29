@@ -1,31 +1,35 @@
 import { Search, Plus, MoreVertical, Mail, Phone } from 'lucide-react'
+import { Link } from 'react-router-dom'
 import Card from '../components/ui/Card'
 
 const Clients = () => {
-  // Datos simulados para ver cómo queda
+  // Datos simulados
   const clients = [
-    { id: 1, name: "Facundo Sorane", plan: "Pérdida de Peso", status: "Activo", email: "Facundo@email.com", phone: "+54 9 11 1234-5678" },
-    { id: 2, name: "Maxi Prieto", plan: "Calistenia", status: "Pendiente", email: "carlos@email.com", phone: "+54 9 11 8765-4321" },
-    { id: 3, name: "Matías Saravia", plan: "Pilates", status: "Activo", email: "matias@email.com", phone: "+54 9 11 5555-6666" },
-    { id: 4, name: "Jose Cordoba", plan: "Pérdida de Peso", status: "Inactivo", email: "jose@email.com", phone: "+54 9 11 9999-0000" },
-    { id: 5, name: "Pablo Czurylo", plan: "Crossfit", status: "Activo", email: "pablo@email.com", phone: "+54 9 11 1111-2222" },
+    { id: 1, name: "Ana García", plan: "Pérdida de Peso", status: "Activo", email: "ana@email.com", phone: "+54 9 11 1234-5678" },
+    { id: 2, name: "Carlos Ruiz", plan: "Hipertrofia", status: "Pendiente", email: "carlos@email.com", phone: "+54 9 11 8765-4321" },
+    { id: 3, name: "Lucía Mendez", plan: "Funcional", status: "Activo", email: "lucia@email.com", phone: "+54 9 11 5555-6666" },
+    { id: 4, name: "Marcos Diaz", plan: "Rehabilitación", status: "Inactivo", email: "marcos@email.com", phone: "+54 9 11 9999-0000" },
+    { id: 5, name: "Sofia Perez", plan: "Crossfit", status: "Activo", email: "sofia@email.com", phone: "+54 9 11 1111-2222" },
   ]
 
   return (
     <div className="space-y-6">
-      {/*  Encabezado y Botón de Crear */}
+      {/* 1. Encabezado Responsive (Columna en móvil, Fila en PC) */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
           <h1 className="text-2xl font-bold text-white">Gestión de Clientes</h1>
           <p className="text-gray-400">Administra a tus alumnos y sus planes.</p>
         </div>
-        <button className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-lg flex items-center gap-2 font-medium transition-colors">
+        <Link 
+          to="/clients/new" 
+          className="w-full sm:w-auto justify-center bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-lg flex items-center gap-2 font-medium transition-colors"
+        >
           <Plus size={20} />
           Nuevo Cliente
-        </button>
+        </Link>
       </div>
 
-      {/* Barra de Búsqueda */}
+      {/* 2. Barra de Búsqueda */}
       <Card className="p-4">
         <div className="relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" size={20} />
@@ -37,10 +41,61 @@ const Clients = () => {
         </div>
       </Card>
 
-      {/* Tabla de Clientes */}
-      <Card className="p-0 overflow-hidden">
+      {/* 3. Vista de Clientes Responsive */}
+      {/* Versión móvil: Lista de tarjetas */}
+      <div className="block sm:hidden space-y-4 overflow-x-hidden">
+        {clients.map((client) => (
+          <Card key={client.id} className="p-4 overflow-hidden">
+            <div className="flex items-center gap-3 mb-3">
+              <div className="w-10 h-10 rounded-full bg-gray-700 flex items-center justify-center text-white font-bold">
+                {client.name.charAt(0)}
+              </div>
+              <div className="min-w-0 flex-1">
+                <span className="font-medium text-white truncate block">{client.name}</span>
+                <div className="text-sm text-gray-400 mt-1">
+                  <div className="flex items-center gap-2">
+                    <Mail size={14} /> <span className="truncate">{client.email}</span>
+                  </div>
+                  <div className="flex items-center gap-2 mt-1">
+                    <Phone size={14} /> <span className="truncate">{client.phone}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div className="flex justify-between items-center">
+              <div className="min-w-0 flex-1">
+                <span className="px-2 py-1 bg-gray-800 rounded text-gray-300 border border-gray-700 text-sm truncate inline-block mr-2">
+                  {client.plan}
+                </span>
+                <span className={`px-2 py-1 rounded-full text-xs font-medium border truncate inline-block ${
+                  client.status === 'Activo' ? 'bg-green-500/10 text-green-500 border-green-500/20' :
+                  client.status === 'Pendiente' ? 'bg-yellow-500/10 text-yellow-500 border-yellow-500/20' :
+                  'bg-red-500/10 text-red-500 border-red-500/20'
+                }`}>
+                  {client.status}
+                </span>
+              </div>
+              <button className="text-gray-500 hover:text-white p-2 rounded-lg hover:bg-gray-700 transition-colors flex-shrink-0">
+                <MoreVertical size={18} />
+              </button>
+            </div>
+          </Card>
+        ))}
+        
+        {/* Paginación móvil */}
+        <div className="flex flex-col justify-between items-center gap-4 text-xs text-gray-500 pt-4 border-t border-gray-800 overflow-x-hidden">
+          <span className="truncate">Mostrando 5 de 24 clientes</span>
+          <div className="flex gap-2">
+            <button className="px-3 py-1 bg-gray-800 rounded hover:bg-gray-700 disabled:opacity-50 truncate">Anterior</button>
+            <button className="px-3 py-1 bg-gray-800 rounded hover:bg-gray-700 text-white truncate">Siguiente</button>
+          </div>
+        </div>
+      </div>
+
+      {/* Versión desktop: Tabla con Scroll Horizontal */}
+      <Card className="hidden sm:block p-0 overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-sm text-gray-400">
+          <table className="w-full text-left text-sm text-gray-400 whitespace-nowrap"> 
             <thead className="bg-gray-800 text-gray-200 uppercase font-medium">
               <tr>
                 <th className="px-6 py-4">Cliente</th>
@@ -53,7 +108,6 @@ const Clients = () => {
             <tbody className="divide-y divide-gray-800">
               {clients.map((client) => (
                 <tr key={client.id} className="hover:bg-gray-800/50 transition-colors group">
-                  {/* Columna Nombre + Avatar */}
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-3">
                       <div className="w-10 h-10 rounded-full bg-gray-700 flex items-center justify-center text-white font-bold">
@@ -62,8 +116,6 @@ const Clients = () => {
                       <span className="font-medium text-white">{client.name}</span>
                     </div>
                   </td>
-                  
-                  {/* Columna Contacto */}
                   <td className="px-6 py-4">
                     <div className="flex flex-col gap-1">
                       <div className="flex items-center gap-2 text-gray-300">
@@ -74,15 +126,11 @@ const Clients = () => {
                       </div>
                     </div>
                   </td>
-
-                  {/* Columna Plan */}
                   <td className="px-6 py-4">
                     <span className="px-2 py-1 bg-gray-800 rounded text-gray-300 border border-gray-700">
                       {client.plan}
                     </span>
                   </td>
-
-                  {/* Columna Estado */}
                   <td className="px-6 py-4">
                     <span className={`px-2 py-1 rounded-full text-xs font-medium border ${
                       client.status === 'Activo' ? 'bg-green-500/10 text-green-500 border-green-500/20' :
@@ -92,8 +140,6 @@ const Clients = () => {
                       {client.status}
                     </span>
                   </td>
-
-                  {/* Columna Acciones */}
                   <td className="px-6 py-4 text-right">
                     <button className="text-gray-500 hover:text-white p-2 rounded-lg hover:bg-gray-700 transition-colors">
                       <MoreVertical size={18} />
@@ -106,7 +152,7 @@ const Clients = () => {
         </div>
         
         {/* Paginación */}
-        <div className="p-4 border-t border-gray-800 flex justify-between items-center text-xs text-gray-500">
+        <div className="p-4 border-t border-gray-800 flex flex-col sm:flex-row justify-between items-center gap-4 text-xs text-gray-500">
           <span>Mostrando 5 de 24 clientes</span>
           <div className="flex gap-2">
             <button className="px-3 py-1 bg-gray-800 rounded hover:bg-gray-700 disabled:opacity-50">Anterior</button>
