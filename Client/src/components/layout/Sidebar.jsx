@@ -1,11 +1,12 @@
 import { NavLink } from 'react-router-dom'
-import { LayoutDashboard, Users, LogOut, X } from 'lucide-react'
+import { LayoutDashboard, Users, LogOut, X, Dumbbell } from 'lucide-react'
 
 // Recibimos "isOpen" y "toggleSidebar" desde el Layout
 const Sidebar = ({ isOpen, toggleSidebar }) => {
   const menuItems = [
     { icon: LayoutDashboard, label: 'Dashboard', path: '/dashboard' },
     { icon: Users, label: 'Clientes', path: '/clients' },
+    { icon: Dumbbell, label: 'Ejercicios', path: '/exercises' },
   ]
 
   return (

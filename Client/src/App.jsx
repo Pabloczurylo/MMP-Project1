@@ -5,6 +5,7 @@ import Login from './pages/Login'
 import Dashboard from './pages/Dashboard'
 import Clients from './pages/Clients'
 import ClientForm from './pages/ClientForm'
+import Exercises from './pages/Exercises'
 
 function App() {
   return (
@@ -15,11 +16,12 @@ function App() {
       <Route path="/login" element={<Login />} />
 
       {/* 2. Rutas Privadas (Con Sidebar) */}
-      {/* ESTA ES LA CLAVE: Todo lo que esté aquí dentro tendrá Sidebar */}
+      {/* Todo lo que esté acá dentro tendrá Sidebar */}
       <Route element={<MainLayout />}>
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/clients" element={<Clients />} />
         <Route path="/clients/new" element={<ClientForm />} />
+        <Route path="/exercises" element={<Exercises />} />
       </Route>
 
       {/* 3. Redirección si la ruta no existe */}
