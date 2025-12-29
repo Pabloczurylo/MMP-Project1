@@ -5,23 +5,25 @@ import Card from '../components/ui/Card'
 const ClientForm = () => {
   return (
     <div className="space-y-6">
-      {/* Encabezado */}
-      <div className="flex justify-between items-center">
+      {/* Encabezado Responsive */}
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
           <h1 className="text-2xl font-bold text-white">Nuevo Cliente</h1>
           <p className="text-gray-400">Registra la información inicial de tu alumno.</p>
         </div>
-        <div className="flex gap-3">
+        
+        {/* Botones: Ancho completo en móvil, tamaño normal en PC */}
+        <div className="flex gap-3 w-full sm:w-auto">
           <Link 
             to="/clients"
-            className="px-4 py-2 rounded-lg text-gray-400 hover:text-white hover:bg-gray-800 transition-colors flex items-center gap-2"
+            className="flex-1 sm:flex-none justify-center px-4 py-2 rounded-lg text-gray-400 hover:text-white hover:bg-gray-800 transition-colors flex items-center gap-2 border border-gray-800 sm:border-transparent"
           >
             <X size={20} />
             Cancelar
           </Link>
-          <button className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-medium flex items-center gap-2 transition-colors">
+          <button className="flex-1 sm:flex-none justify-center bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-medium flex items-center gap-2 transition-colors">
             <Save size={20} />
-            Guardar Cliente
+            Guardar
           </button>
         </div>
       </div>
