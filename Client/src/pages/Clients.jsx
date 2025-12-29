@@ -1,5 +1,6 @@
 import { Search, Plus, MoreVertical, Mail, Phone } from 'lucide-react'
 import Card from '../components/ui/Card'
+import { Link } from 'react-router-dom'
 
 const Clients = () => {
   // Datos simulados para ver cómo queda
@@ -19,10 +20,13 @@ const Clients = () => {
           <h1 className="text-2xl font-bold text-white">Gestión de Clientes</h1>
           <p className="text-gray-400">Administra a tus alumnos y sus planes.</p>
         </div>
-        <button className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-lg flex items-center gap-2 font-medium transition-colors">
+        <Link 
+           to="/clients/new" 
+           className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-lg flex items-center gap-2 font-medium transition-colors"
+        >
           <Plus size={20} />
           Nuevo Cliente
-        </button>
+        </Link>
       </div>
 
       {/* Barra de Búsqueda */}
