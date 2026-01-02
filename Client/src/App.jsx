@@ -6,6 +6,7 @@ import Dashboard from './pages/Dashboard'
 import Clients from './pages/Clients'
 import ClientForm from './pages/ClientForm'
 import Exercises from './pages/Exercises'
+import CreateRoutine from './pages/CreateRoutine'
 
 function App() {
   return (
@@ -22,6 +23,7 @@ function App() {
         <Route path="/clients" element={<Clients />} />
         <Route path="/clients/new" element={<ClientForm />} />
         <Route path="/exercises" element={<Exercises />} />
+        <Route path="/routines/new" element={<CreateRoutine />} />
       </Route>
 
       {/* 3. Redirección si la ruta no existe */}
