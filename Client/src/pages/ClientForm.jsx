@@ -1,130 +1,159 @@
-import { Save, X, User, Mail, Phone, Target, Dumbbell, Ruler, Weight } from 'lucide-react'
-import { Link } from 'react-router-dom'
-import Card from '../components/ui/Card'
+import { useForm } from 'react-hook-form'
+import { User, Mail, Phone, Target, FileText, Save, X } from 'lucide-react'
+import { Link, useNavigate } from 'react-router-dom'
 
 const ClientForm = () => {
+  const { register, handleSubmit, formState: { errors } } = useForm()
+  const navigate = useNavigate()
+
+  const onSubmit = (data) => {
+    console.log("Nuevo Cliente:", data)
+    // Aquí conectaremos con el Backend después
+    alert("Cliente registrado (simulado)")
+    navigate('/dashboard')
+  }
+
   return (
-    <div className="space-y-6">
-      {/* Encabezado Responsive */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+    <div className="max-w-4xl mx-auto">
+      {/* Encabezado */}
+      <div className="flex items-center justify-between mb-8">
         <div>
-          <h1 className="text-2xl font-bold text-white">Nuevo Cliente</h1>
-          <p className="text-gray-400">Registra la información inicial de tu alumno.</p>
+          <h1 className="text-3xl font-bold text-white">Nuevo Cliente</h1>
+          <p className="text-gray-400 mt-1">Registra los datos personales y objetivos.</p>
         </div>
-        
-        {/* Botones: Ancho completo en móvil, tamaño normal en PC */}
-        <div className="flex gap-3 w-full sm:w-auto">
-          <Link 
-            to="/clients"
-            className="flex-1 sm:flex-none justify-center px-4 py-2 rounded-lg text-gray-400 hover:text-white hover:bg-gray-800 transition-colors flex items-center gap-2 border border-gray-800 sm:border-transparent"
-          >
-            <X size={20} />
-            Cancelar
-          </Link>
-          <button className="flex-1 sm:flex-none justify-center bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-medium flex items-center gap-2 transition-colors">
-            <Save size={20} />
-            Guardar
-          </button>
-        </div>
+        <Link 
+          to="/dashboard"
+          className="p-2 text-gray-400 hover:text-white hover:bg-gray-800 rounded-lg transition-colors"
+        >
+          <X size={24} />
+        </Link>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Columna 1: Datos Personales */}
-        <div className="space-y-6">
-          <h2 className="text-lg font-semibold text-white flex items-center gap-2">
+      {/* Formulario */}
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+        
+        {/* Tarjeta de Datos Personales */}
+        <div className="bg-[#111111] p-6 rounded-2xl border border-gray-800/50">
+          <h2 className="text-xl font-bold text-white mb-6 flex items-center gap-2">
             <User className="text-blue-500" size={20} />
-            Datos Personales
+            Información Personal
           </h2>
-          <Card className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-400 mb-1">Nombre Completo</label>
-              <input 
-                type="text" 
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Nombre Completo */}
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-gray-300">Nombre Completo</label>
+              <input
+                {...register("fullName", { required: "El nombre es obligatorio" })}
+                type="text"
+                className="w-full bg-[#1a1a1a] border border-gray-800 rounded-xl p-3 text-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-all"
                 placeholder="Ej: Juan Pérez"
-                className="w-full bg-gray-950 border border-gray-800 text-white px-4 py-3 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+              />
+              {errors.fullName && <span className="text-red-500 text-xs">{errors.fullName.message}</span>}
+            </div>
+
+            {/* Email */}
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-gray-300">Email</label>
+              <div className="relative">
+                <input
+                  {...register("email", { 
+                    required: "El email es obligatorio",
+                    pattern: { value: /^\S+@\S+$/i, message: "Email inválido" }
+                  })}
+                  type="email"
+                  className="w-full bg-[#1a1a1a] border border-gray-800 rounded-xl p-3 pl-10 text-white focus:border-blue-500 outline-none transition-all"
+                  placeholder="juan@email.com"
+                />
+                <Mail className="absolute left-3 top-3.5 text-gray-500" size={18} />
+              </div>
+              {errors.email && <span className="text-red-500 text-xs">{errors.email.message}</span>}
+            </div>
+
+            {/* Teléfono */}
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-gray-300">Teléfono</label>
+              <div className="relative">
+                <input
+                  {...register("phone", { required: "El teléfono es requerido" })}
+                  type="tel"
+                  className="w-full bg-[#1a1a1a] border border-gray-800 rounded-xl p-3 pl-10 text-white focus:border-blue-500 outline-none transition-all"
+                  placeholder="+54 9 11..."
+                />
+                <Phone className="absolute left-3 top-3.5 text-gray-500" size={18} />
+              </div>
+            </div>
+
+            {/* Edad */}
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-gray-300">Edad</label>
+              <input
+                {...register("age", { required: true, min: 14, max: 100 })}
+                type="number"
+                className="w-full bg-[#1a1a1a] border border-gray-800 rounded-xl p-3 text-white focus:border-blue-500 outline-none transition-all"
+                placeholder="25"
               />
             </div>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-400 mb-1 flex items-center gap-1">
-                  <Mail size={14} /> Email
-                </label>
-                <input 
-                  type="email" 
-                  placeholder="juan@email.com"
-                  className="w-full bg-gray-950 border border-gray-800 text-white px-4 py-3 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-400 mb-1 flex items-center gap-1">
-                  <Phone size={14} /> Teléfono
-                </label>
-                <input 
-                  type="tel" 
-                  placeholder="+54 9 11..."
-                  className="w-full bg-gray-950 border border-gray-800 text-white px-4 py-3 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-                />
-              </div>
-            </div>
-          </Card>
+          </div>
         </div>
 
-        {/* Columna 2: Objetivo y Físico */}
-        <div className="space-y-6">
-          <h2 className="text-lg font-semibold text-white flex items-center gap-2">
-            <Dumbbell className="text-purple-500" size={20} />
-            Objetivos y Físico
+        {/* Tarjeta de Objetivos */}
+        <div className="bg-[#111111] p-6 rounded-2xl border border-gray-800/50">
+          <h2 className="text-xl font-bold text-white mb-6 flex items-center gap-2">
+            <Target className="text-purple-500" size={20} />
+            Objetivos Fitness
           </h2>
-          <Card className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-400 mb-1 flex items-center gap-1">
-                <Target size={14} /> Plan / Objetivo Principal
-              </label>
-              <select className="w-full bg-gray-950 border border-gray-800 text-white px-4 py-3 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
-                <option value="">Seleccionar Plan...</option>
-                <option value="peruida_peso">Pérdida de Peso</option>
-                <option value="hipertrofia">Hipertrofia Muscular</option>
-                <option value="fuerza">Ganancia de Fuerza</option>
+
+          <div className="space-y-6">
+            {/* Objetivo Principal */}
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-gray-300">Objetivo Principal</label>
+              <select 
+                {...register("goal")}
+                className="w-full bg-[#1a1a1a] border border-gray-800 rounded-xl p-3 text-white focus:border-purple-500 outline-none transition-all appearance-none"
+              >
+                <option value="perdida_peso">Pérdida de Peso</option>
+                <option value="hipertrofia">Ganancia Muscular (Hipertrofia)</option>
                 <option value="resistencia">Resistencia / Cardio</option>
-                <option value="rehabilitacion">Rehabilitación</option>
+                <option value="fuerza">Fuerza / Powerlifting</option>
+                <option value="salud">Salud General</option>
               </select>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-400 mb-1 flex items-center gap-1">
-                  <Weight size={14} /> Peso (kg)
-                </label>
-                <input 
-                  type="number" 
-                  placeholder="0.0"
-                  className="w-full bg-gray-950 border border-gray-800 text-white px-4 py-3 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-400 mb-1 flex items-center gap-1">
-                  <Ruler size={14} /> Altura (cm)
-                </label>
-                <input 
-                  type="number" 
-                  placeholder="0"
-                  className="w-full bg-gray-950 border border-gray-800 text-white px-4 py-3 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-                />
+            {/* Notas / Observaciones */}
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-gray-300">Observaciones / Lesiones</label>
+              <div className="relative">
+                <textarea
+                  {...register("notes")}
+                  rows="4"
+                  className="w-full bg-[#1a1a1a] border border-gray-800 rounded-xl p-3 pl-10 text-white focus:border-purple-500 outline-none transition-all resize-none"
+                  placeholder="Ej: Dolor en rodilla izquierda, disponible solo mañanas..."
+                ></textarea>
+                <FileText className="absolute left-3 top-3.5 text-gray-500" size={18} />
               </div>
             </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-400 mb-1">Notas / Lesiones</label>
-              <textarea 
-                rows="3"
-                placeholder="Ej: Dolor en rodilla izquierda..."
-                className="w-full bg-gray-950 border border-gray-800 text-white px-4 py-3 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-              ></textarea>
-            </div>
-          </Card>
+          </div>
         </div>
-      </div>
+
+        {/* Botones de Acción */}
+        <div className="flex justify-end gap-4 pt-4">
+          <Link 
+            to="/dashboard"
+            className="px-6 py-3 rounded-xl border border-gray-700 text-gray-300 font-medium hover:bg-gray-800 transition-colors"
+          >
+            Cancelar
+          </Link>
+          <button
+            type="submit"
+            className="px-6 py-3 rounded-xl bg-blue-600 text-white font-bold hover:bg-blue-700 transition-colors flex items-center gap-2 shadow-lg shadow-blue-900/20"
+          >
+            <Save size={20} />
+            Guardar Cliente
+          </button>
+        </div>
+
+      </form>
     </div>
   )
 }

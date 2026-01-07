@@ -1,22 +1,13 @@
 import React from 'react';
 import { useForm } from 'react-hook-form';
 import { User, EyeOff } from 'lucide-react';
-import { useNavigate } from 'react-router-dom'; 
 
 const Login = () => {
   const { register, handleSubmit, formState: { errors } } = useForm();
-  const navigate = useNavigate(); //   Inicializamos la navegación
 
   const onSubmit = (data) => {
+    // Aquí es donde se conectará con el Backend real en el futuro
     console.log("Datos del login:", data);
-    
-    //   LÓGICA TEMPORAL (HARDCODED)
-    if (data.username === 'admin' && data.password === '1234') {
-      navigate('/dashboard');
-    } else {
-      alert("Credenciales incorrectas (Usa: admin / 1234)");
-    }
-    //  FIN DE LÓGICA TEMPORAL
   };
 
   return (
