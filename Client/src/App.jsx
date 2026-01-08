@@ -5,9 +5,12 @@ import Login from './pages/Login'
 import Dashboard from './pages/Dashboard'
 import Clients from './pages/Clients'
 import ClientForm from './pages/ClientForm'
-import Exercises from './pages/Exercises'
+// import Exercises from './pages/Exercises' 
 import CreateRoutine from './pages/CreateRoutine'
 import Routines from './pages/Routines'
+import ExercisesList from './pages/ExercisesList'
+import ExerciseForm from './pages/ExerciseForm'
+
 
 function App() {
   return (
@@ -21,9 +24,16 @@ function App() {
       {/* Todo lo que esté acá dentro tendrá Sidebar */}
       <Route element={<MainLayout />}>
         <Route path="/dashboard" element={<Dashboard />} />
+        
+        {/* Rutas de Clientes */}
         <Route path="/clients" element={<Clients />} />
         <Route path="/clients/new" element={<ClientForm />} />
-        <Route path="/exercises" element={<Exercises />} />
+        
+        {/* Rutas de Ejercicios */}
+        <Route path="/exercises" element={<ExercisesList />} />
+        <Route path="/exercises/new" element={<ExerciseForm />} />
+        
+        {/* Rutas de Rutinas */}
         <Route path="/routines/new" element={<CreateRoutine />} />
         <Route path="/routines" element={<Routines />} />
       </Route>
