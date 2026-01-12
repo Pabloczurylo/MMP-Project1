@@ -19,6 +19,7 @@ const Clients = () => {
   })
   const [searchTerm, setSearchTerm] = useState('')
   const [openMenu, setOpenMenu] = useState(null)
+  const [openStatus, setOpenStatus] = useState(null)
   const pageRef = useRef(null)
 
   useEffect(() => {
@@ -36,8 +37,14 @@ const Clients = () => {
   useEffect(() => {
     const handleDocClick = (e) => {
       // if click is inside a menu or its toggle, do nothing
-      if (e.target.closest && (e.target.closest('[data-menu]') || e.target.closest('[data-menu-toggle]'))) return
+      if (e.target.closest && (
+        e.target.closest('[data-menu]') ||
+        e.target.closest('[data-menu-toggle]') ||
+        e.target.closest('[data-status-menu]') ||
+        e.target.closest('[data-status-toggle]')
+      )) return
       setOpenMenu(null)
+      setOpenStatus(null)
     }
     document.addEventListener('click', handleDocClick)
     return () => document.removeEventListener('click', handleDocClick)
@@ -45,6 +52,17 @@ const Clients = () => {
 
   const toggleMenu = (id) => {
     setOpenMenu(prev => prev === id ? null : id)
+  }
+
+  const toggleStatus = (id) => {
+    setOpenStatus(prev => prev === id ? null : id)
+  }
+
+  const updateStatus = (id, status) => {
+    const updated = clients.map(c => c.id === id ? { ...c, status } : c)
+    setClients(updated)
+    localStorage.setItem('clients', JSON.stringify(updated))
+    setOpenStatus(null)
   }
 
   const deleteClient = (id) => {
@@ -117,16 +135,23 @@ const Clients = () => {
             </div>
             <div className="flex justify-between items-center">
               <div className="min-w-0 flex-1">
-                <span className="px-2 py-1 bg-gray-800 rounded text-gray-300 border border-gray-700 text-sm truncate inline-block mr-2">
+                <span className={`px-2 py-1 bg-gray-800 rounded text-gray-300 border border-gray-700 text-sm truncate inline-block mr-2`}>
                   {client.plan}
                 </span>
-                <span className={`px-2 py-1 rounded-full text-xs font-medium border truncate inline-block ${
-                  client.status === 'Activo' ? 'bg-green-500/10 text-green-500 border-green-500/20' :
-                  client.status === 'Pendiente' ? 'bg-yellow-500/10 text-yellow-500 border-yellow-500/20' :
-                  'bg-red-500/10 text-red-500 border-red-500/20'
-                }`}>
-                  {client.status}
-                </span>
+                <div className="relative inline-block">
+                  <button data-status-toggle onClick={() => toggleStatus(client.id)} className={`px-2 py-1 rounded-full text-xs font-medium border truncate inline-block ${
+                    client.status === 'Activo' ? 'bg-green-500/10 text-green-500 border-green-500/20' :
+                    client.status === 'Pendiente' ? 'bg-gray-800 text-gray-200 border-gray-700' :
+                    'bg-red-500/10 text-red-500 border-red-500/20'
+                  }`}>{client.status}</button>
+                  {openStatus === client.id && (
+                    <div data-status-menu className="absolute right-0 mt-2 w-40 bg-gray-900 border border-gray-800 rounded shadow-lg z-50">
+                      <button onClick={() => updateStatus(client.id, 'Activo')} className="w-full text-left px-4 py-2 hover:bg-green-600/20 text-green-400">Activo</button>
+                      <button onClick={() => updateStatus(client.id, 'Pendiente')} className="w-full text-left px-4 py-2 hover:bg-gray-800 text-gray-200">Pendiente</button>
+                      <button onClick={() => updateStatus(client.id, 'Inactivo')} className="w-full text-left px-4 py-2 hover:bg-red-600 text-red-400">Inactivo</button>
+                    </div>
+                  )}
+                </div>
               </div>
               <div className="relative">
                 <button data-menu-toggle onClick={() => toggleMenu(client.id)} className="text-gray-500 hover:text-white p-2 rounded-lg hover:bg-gray-700 transition-colors flex-shrink-0">
@@ -193,13 +218,22 @@ const Clients = () => {
                     </span>
                   </td>
                   <td className="px-6 py-4">
-                    <span className={`px-2 py-1 rounded-full text-xs font-medium border ${
-                      client.status === 'Activo' ? 'bg-green-500/10 text-green-500 border-green-500/20' :
-                      client.status === 'Pendiente' ? 'bg-yellow-500/10 text-yellow-500 border-yellow-500/20' :
-                      'bg-red-500/10 text-red-500 border-red-500/20'
-                    }`}>
-                      {client.status}
-                    </span>
+                    <div className="relative inline-block">
+                      <button data-status-toggle onClick={() => toggleStatus(client.id)} className={`px-2 py-1 rounded-full text-xs font-medium border ${
+                        client.status === 'Activo' ? 'bg-green-500/10 text-green-500 border-green-500/20' :
+                        client.status === 'Pendiente' ? 'bg-gray-800 text-gray-200 border-gray-700' :
+                        'bg-red-500/10 text-red-500 border-red-500/20'
+                      }`}>
+                        {client.status}
+                      </button>
+                      {openStatus === client.id && (
+                        <div data-status-menu className="absolute right-0 mt-2 w-40 bg-gray-900 border border-gray-800 rounded shadow-lg z-50">
+                          <button onClick={() => updateStatus(client.id, 'Activo')} className="w-full text-left px-4 py-2 hover:bg-green-600/20 text-green-400">Activo</button>
+                          <button onClick={() => updateStatus(client.id, 'Pendiente')} className="w-full text-left px-4 py-2 hover:bg-gray-800 text-gray-200">Pendiente</button>
+                          <button onClick={() => updateStatus(client.id, 'Inactivo')} className="w-full text-left px-4 py-2 hover:bg-red-600 text-red-400">Inactivo</button>
+                        </div>
+                      )}
+                    </div>
                   </td>
                   <td className="px-6 py-4 text-right">
                     <div className="relative inline-block">
