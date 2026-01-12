@@ -145,10 +145,10 @@ const Clients = () => {
                     'bg-red-500/10 text-red-500 border-red-500/20'
                   }`}>{client.status}</button>
                   {openStatus === client.id && (
-                    <div data-status-menu className="absolute right-0 mt-2 w-40 bg-gray-900 border border-gray-800 rounded shadow-lg z-50">
-                      <button onClick={() => updateStatus(client.id, 'Activo')} className="w-full text-left px-4 py-2 hover:bg-green-600/20 text-green-400">Activo</button>
-                      <button onClick={() => updateStatus(client.id, 'Pendiente')} className="w-full text-left px-4 py-2 hover:bg-gray-800 text-gray-200">Pendiente</button>
-                      <button onClick={() => updateStatus(client.id, 'Inactivo')} className="w-full text-left px-4 py-2 hover:bg-red-600 text-red-400">Inactivo</button>
+                    <div data-status-menu className="absolute right-0 mt-2 w-40 bg-gray-900 border border-gray-800 rounded shadow-lg z-50 flex flex-col">
+                      <button onClick={() => updateStatus(client.id, 'Activo')} className="block w-full text-left px-4 py-2 hover:bg-green-600/20 text-green-400">Activo</button>
+                      <button onClick={() => updateStatus(client.id, 'Pendiente')} className="block w-full text-left px-4 py-2 hover:bg-gray-800 text-gray-200">Pendiente</button>
+                      <button onClick={() => updateStatus(client.id, 'Inactivo')} className="block w-full text-left px-4 py-2 hover:bg-red-600 text-red-400">Inactivo</button>
                     </div>
                   )}
                 </div>
@@ -227,10 +227,10 @@ const Clients = () => {
                         {client.status}
                       </button>
                       {openStatus === client.id && (
-                        <div data-status-menu className="absolute right-0 mt-2 w-40 bg-gray-900 border border-gray-800 rounded shadow-lg z-50">
-                          <button onClick={() => updateStatus(client.id, 'Activo')} className="w-full text-left px-4 py-2 hover:bg-green-600/20 text-green-400">Activo</button>
-                          <button onClick={() => updateStatus(client.id, 'Pendiente')} className="w-full text-left px-4 py-2 hover:bg-gray-800 text-gray-200">Pendiente</button>
-                          <button onClick={() => updateStatus(client.id, 'Inactivo')} className="w-full text-left px-4 py-2 hover:bg-red-600 text-red-400">Inactivo</button>
+                        <div data-status-menu className="absolute right-0 mt-2 w-40 bg-gray-900 border border-gray-800 rounded shadow-lg z-50 flex flex-col">
+                          <button onClick={() => updateStatus(client.id, 'Activo')} className="block w-full text-left px-4 py-2 hover:bg-green-600/20 text-green-400">Activo</button>
+                          <button onClick={() => updateStatus(client.id, 'Pendiente')} className="block w-full text-left px-4 py-2 hover:bg-gray-800 text-gray-200">Pendiente</button>
+                          <button onClick={() => updateStatus(client.id, 'Inactivo')} className="block w-full text-left px-4 py-2 hover:bg-red-600 text-red-400">Inactivo</button>
                         </div>
                       )}
                     </div>
