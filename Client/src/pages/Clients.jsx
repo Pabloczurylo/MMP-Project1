@@ -17,6 +17,7 @@ const Clients = () => {
     const stored = localStorage.getItem('clients')
     return stored ? JSON.parse(stored) : defaultClients
   })
+  const [searchTerm, setSearchTerm] = useState('')
   const [openMenu, setOpenMenu] = useState(null)
   const pageRef = useRef(null)
 
@@ -53,6 +54,15 @@ const Clients = () => {
     setOpenMenu(null)
   }
 
+  const q = searchTerm.trim().toLowerCase()
+  const filteredClients = q
+    ? clients.filter(c => (
+        (c.name && c.name.toLowerCase().includes(q)) ||
+        (c.email && c.email.toLowerCase().includes(q)) ||
+        (c.plan && c.plan.toLowerCase().includes(q))
+      ))
+    : clients
+
   return (
     <div className="space-y-6">
       {/* 1. Encabezado Responsive (Columna en móvil, Fila en PC) */}
@@ -71,11 +81,13 @@ const Clients = () => {
       </div>
 
       {/* 2. Barra de Búsqueda */}
-      <Card className="p-4">
+          <Card className="p-4">
         <div className="relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" size={20} />
           <input 
             type="text" 
+            value={searchTerm}
+            onChange={e => setSearchTerm(e.target.value)}
             placeholder="Buscar por nombre, email o plan..." 
             className="w-full bg-gray-950 border border-gray-800 text-white pl-10 pr-4 py-2 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 placeholder-gray-600"
           />
@@ -85,7 +97,7 @@ const Clients = () => {
       {/* 3. Vista de Clientes Responsive */}
       {/* Versión móvil: Lista de tarjetas */}
       <div className="block sm:hidden space-y-4 overflow-x-hidden">
-        {clients.map((client) => (
+        {filteredClients.map((client) => (
           <Card key={client.id} className="p-4 overflow-hidden">
             <div className="flex items-center gap-3 mb-3">
               <div className="w-10 h-10 rounded-full bg-gray-700 flex items-center justify-center text-white font-bold">
@@ -155,7 +167,7 @@ const Clients = () => {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-800">
-              {clients.map((client) => (
+              {filteredClients.map((client) => (
                 <tr key={client.id} className="hover:bg-gray-800/50 transition-colors group">
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-3">
