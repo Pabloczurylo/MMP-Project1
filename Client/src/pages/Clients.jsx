@@ -1,5 +1,5 @@
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { Search, Plus, MoreVertical, Mail, Phone } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import Card from '../components/ui/Card'
@@ -17,6 +17,8 @@ const Clients = () => {
     const stored = localStorage.getItem('clients')
     return stored ? JSON.parse(stored) : defaultClients
   })
+  const [openMenu, setOpenMenu] = useState(null)
+  const pageRef = useRef(null)
 
   useEffect(() => {
     const sync = () => {
@@ -29,6 +31,27 @@ const Clients = () => {
     window.addEventListener('storage', sync)
     return () => window.removeEventListener('storage', sync)
   }, [])
+
+  useEffect(() => {
+    const handleDocClick = (e) => {
+      // if click is inside a menu or its toggle, do nothing
+      if (e.target.closest && (e.target.closest('[data-menu]') || e.target.closest('[data-menu-toggle]'))) return
+      setOpenMenu(null)
+    }
+    document.addEventListener('click', handleDocClick)
+    return () => document.removeEventListener('click', handleDocClick)
+  }, [])
+
+  const toggleMenu = (id) => {
+    setOpenMenu(prev => prev === id ? null : id)
+  }
+
+  const deleteClient = (id) => {
+    const updated = clients.filter(c => c.id !== id)
+    setClients(updated)
+    localStorage.setItem('clients', JSON.stringify(updated))
+    setOpenMenu(null)
+  }
 
   return (
     <div className="space-y-6">
@@ -93,9 +116,16 @@ const Clients = () => {
                   {client.status}
                 </span>
               </div>
-              <button className="text-gray-500 hover:text-white p-2 rounded-lg hover:bg-gray-700 transition-colors flex-shrink-0">
-                <MoreVertical size={18} />
-              </button>
+              <div className="relative">
+                <button data-menu-toggle onClick={() => toggleMenu(client.id)} className="text-gray-500 hover:text-white p-2 rounded-lg hover:bg-gray-700 transition-colors flex-shrink-0">
+                  <MoreVertical size={18} />
+                </button>
+                {openMenu === client.id && (
+                  <div data-menu className="absolute right-0 mt-2 w-36 bg-gray-900 border border-gray-800 rounded shadow-lg z-50">
+                    <button onClick={() => deleteClient(client.id)} className="w-full text-left px-4 py-2 hover:bg-red-600 hover:text-white text-red-400">Eliminar</button>
+                  </div>
+                )}
+              </div>
             </div>
           </Card>
         ))}
@@ -159,9 +189,16 @@ const Clients = () => {
                     </span>
                   </td>
                   <td className="px-6 py-4 text-right">
-                    <button className="text-gray-500 hover:text-white p-2 rounded-lg hover:bg-gray-700 transition-colors">
-                      <MoreVertical size={18} />
-                    </button>
+                    <div className="relative inline-block">
+                      <button data-menu-toggle onClick={() => toggleMenu(client.id)} className="text-gray-500 hover:text-white p-2 rounded-lg hover:bg-gray-700 transition-colors">
+                        <MoreVertical size={18} />
+                      </button>
+                      {openMenu === client.id && (
+                        <div data-menu className="absolute right-0 mt-2 w-36 bg-gray-900 border border-gray-800 rounded shadow-lg z-50">
+                          <button onClick={() => deleteClient(client.id)} className="w-full text-left px-4 py-2 hover:bg-red-600 hover:text-white text-red-400">Eliminar</button>
+                        </div>
+                      )}
+                    </div>
                   </td>
                 </tr>
               ))}
