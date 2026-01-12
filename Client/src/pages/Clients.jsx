@@ -1,16 +1,34 @@
+
+import { useEffect, useState } from 'react'
 import { Search, Plus, MoreVertical, Mail, Phone } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import Card from '../components/ui/Card'
 
+const defaultClients = [
+  { id: 1, name: "Ana García", plan: "Pérdida de Peso", status: "Activo", email: "ana@email.com", phone: "+54 9 11 1234-5678" },
+  { id: 2, name: "Carlos Ruiz", plan: "Hipertrofia", status: "Pendiente", email: "carlos@email.com", phone: "+54 9 11 8765-4321" },
+  { id: 3, name: "Lucía Mendez", plan: "Funcional", status: "Activo", email: "lucia@email.com", phone: "+54 9 11 5555-6666" },
+  { id: 4, name: "Marcos Diaz", plan: "Rehabilitación", status: "Inactivo", email: "marcos@email.com", phone: "+54 9 11 9999-0000" },
+  { id: 5, name: "Sofia Perez", plan: "Crossfit", status: "Activo", email: "sofia@email.com", phone: "+54 9 11 1111-2222" },
+]
+
 const Clients = () => {
-  // Datos simulados
-  const clients = [
-    { id: 1, name: "Ana García", plan: "Pérdida de Peso", status: "Activo", email: "ana@email.com", phone: "+54 9 11 1234-5678" },
-    { id: 2, name: "Carlos Ruiz", plan: "Hipertrofia", status: "Pendiente", email: "carlos@email.com", phone: "+54 9 11 8765-4321" },
-    { id: 3, name: "Lucía Mendez", plan: "Funcional", status: "Activo", email: "lucia@email.com", phone: "+54 9 11 5555-6666" },
-    { id: 4, name: "Marcos Diaz", plan: "Rehabilitación", status: "Inactivo", email: "marcos@email.com", phone: "+54 9 11 9999-0000" },
-    { id: 5, name: "Sofia Perez", plan: "Crossfit", status: "Activo", email: "sofia@email.com", phone: "+54 9 11 1111-2222" },
-  ]
+  const [clients, setClients] = useState(() => {
+    const stored = localStorage.getItem('clients')
+    return stored ? JSON.parse(stored) : defaultClients
+  })
+
+  useEffect(() => {
+    const sync = () => {
+      const stored = localStorage.getItem('clients')
+      setClients(stored ? JSON.parse(stored) : defaultClients)
+    }
+
+    // Initial sync and listen for changes from other tabs
+    sync()
+    window.addEventListener('storage', sync)
+    return () => window.removeEventListener('storage', sync)
+  }, [])
 
   return (
     <div className="space-y-6">

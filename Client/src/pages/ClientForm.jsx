@@ -7,10 +7,34 @@ const ClientForm = () => {
   const navigate = useNavigate()
 
   const onSubmit = (data) => {
-    console.log("Nuevo Cliente:", data)
-    // Aquí conectaremos con el Backend después
-    alert("Cliente registrado (simulado)")
-    navigate('/dashboard')
+    // Guardar en localStorage para simular persistencia y mostrarse en la tabla
+    const stored = localStorage.getItem('clients')
+    const clients = stored ? JSON.parse(stored) : []
+    const nextId = clients.length ? Math.max(...clients.map(c => c.id)) + 1 : 1
+
+    const planMap = {
+      perdida_peso: 'Pérdida de Peso',
+      hipertrofia: 'Hipertrofia',
+      resistencia: 'Resistencia / Cardio',
+      fuerza: 'Fuerza / Powerlifting',
+      salud: 'Salud General'
+    }
+
+    const newClient = {
+      id: nextId,
+      name: data.fullName,
+      plan: planMap[data.goal] || data.goal || 'General',
+      status: 'Activo',
+      email: data.email || '',
+      phone: data.phone || ''
+    }
+
+    // Añadir al inicio de la lista
+    clients.unshift(newClient)
+    localStorage.setItem('clients', JSON.stringify(clients))
+
+    alert('Cliente registrado')
+    navigate('/clients')
   }
 
   return (
