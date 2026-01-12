@@ -1,120 +1,165 @@
-import { Search, Plus, Calendar, User, Dumbbell, MoreVertical, Play } from 'lucide-react'
+import { useState, useEffect } from 'react'
+import { Search, Plus, ClipboardList, MoreHorizontal, Trash2, Edit2, Loader2, RefreshCw } from 'lucide-react'
 import { Link } from 'react-router-dom'
-import Card from '../components/ui/Card'
 
 const Routines = () => {
-  // Mock Data: Rutinas ya creadas
-  const routines = [
-    { 
-      id: 1, 
-      name: "Hipertrofia Piernas - Fase 1", 
-      client: "Ana García", 
-      exercisesCount: 6, 
-      frequency: "3 días/sem",
-      lastEdited: "Hoy" 
-    },
-    { 
-      id: 2, 
-      name: "Upper Body Power", 
-      client: "Carlos Ruiz", 
-      exercisesCount: 8, 
-      frequency: "4 días/sem",
-      lastEdited: "Ayer" 
-    },
-    { 
-      id: 3, 
-      name: "Adaptación Anatómica", 
-      client: "Lucía Mendez", 
-      exercisesCount: 12, 
-      frequency: "2 días/sem",
-      lastEdited: "Hace 3 días" 
-    },
-    { 
-      id: 4, 
-      name: "Core & Cardio", 
-      client: "Marcos Diaz", 
-      exercisesCount: 5, 
-      frequency: "Libre",
-      lastEdited: "Semana pasada" 
-    },
-  ]
+  const [routines, setRoutines] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [searchTerm, setSearchTerm] = useState('')
+  const [activeMenu, setActiveMenu] = useState(null)
+
+  // Fetch para obtener las rutinas reales
+  const fetchRoutines = async () => {
+    setLoading(true)
+    try {
+      const response = await fetch('http://localhost:3000/api/rutinas')
+      const data = await response.json()
+      if (Array.isArray(data)) {
+        setRoutines(data)
+      }
+    } catch (error) {
+      console.error("Error al cargar rutinas:", error)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  useEffect(() => {
+    fetchRoutines()
+  }, [])
+
+  // Función para eliminar Rutina
+  const handleDelete = async (id) => {
+    if (window.confirm("¿Seguro que quieres eliminar esta rutina?")) {
+      try {
+        const response = await fetch(`http://localhost:3000/api/rutinas/${id}`, {
+          method: 'DELETE'
+        })
+        if (response.ok) {
+          setRoutines(routines.filter(r => r._id !== id))
+          setActiveMenu(null)
+        } else {
+          alert("Error al eliminar")
+        }
+      } catch (error) {
+        console.error(error)
+        alert("Error de conexión")
+      }
+    }
+  }
+
+  const toggleMenu = (id) => {
+    if (activeMenu === id) setActiveMenu(null)
+    else setActiveMenu(id)
+  }
+
+  // Filtros
+  const filteredRoutines = routines.filter(r => 
+    r.nombre.toLowerCase().includes(searchTerm.toLowerCase())
+  )
 
   return (
-    <div className="space-y-6">
-      {/* Encabezado */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+    <div className="max-w-6xl mx-auto space-y-6 text-white p-4">
+      {/* Header */}
+      <div className="flex justify-between items-center gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-white">Mis Rutinas</h1>
-          <p className="text-gray-400">Gestiona y asigna entrenamientos a tus clientes.</p>
+          <h1 className="text-2xl md:text-3xl font-bold">Mis Rutinas</h1>
+          <p className="text-gray-400 text-sm md:text-base">Planes de entrenamiento asignados.</p>
         </div>
         <Link 
           to="/routines/new" 
-          className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-lg flex items-center justify-center gap-2 font-medium transition-colors"
+          className="bg-blue-600 hover:bg-blue-700 text-white p-2 md:px-4 md:py-2 rounded-lg flex items-center gap-2 font-bold transition-colors shadow-lg shadow-blue-900/20"
         >
           <Plus size={20} />
-          Nueva Rutina
+          <span className="hidden md:inline">Nueva Rutina</span>
         </Link>
       </div>
 
-      {/* Barra de Búsqueda */}
-      <Card className="p-4">
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" size={20} />
-          <input 
-            type="text" 
-            placeholder="Buscar por nombre de rutina o cliente..." 
-            className="w-full bg-gray-950 border border-gray-800 text-white pl-10 pr-4 py-2 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 placeholder-gray-600"
+      {/* Buscador */}
+      <div className="bg-[#111111] p-4 rounded-xl border border-gray-800 flex gap-4">
+        <div className="relative flex-1">
+          <input
+            type="text"
+            placeholder="Buscar rutina..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="w-full bg-[#1a1a1a] p-3 pl-10 rounded-xl border border-gray-800 focus:border-blue-500 outline-none transition-all"
           />
+          <Search className="absolute left-3 top-3.5 text-gray-500" size={18} />
         </div>
-      </Card>
+        <button onClick={fetchRoutines} className="p-3 bg-[#1a1a1a] border border-gray-800 rounded-xl hover:text-blue-400 transition-colors">
+            <RefreshCw size={20} />
+        </button>
+      </div>
 
-      {/* Grid de Rutinas */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {routines.map((routine) => (
-          <Card key={routine.id} className="p-5 hover:border-blue-500/50 transition-all group relative">
-            
-            {/* Encabezado de la Tarjeta */}
-            <div className="flex justify-between items-start mb-4">
-              <div>
-                <h3 className="font-bold text-white text-lg group-hover:text-blue-400 transition-colors">
-                  {routine.name}
-                </h3>
-                <div className="flex items-center gap-2 text-gray-400 text-sm mt-1">
-                  <User size={14} />
-                  <span>{routine.client}</span>
+      {/* Lista de Rutinas */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {loading ? (
+           <div className="col-span-full flex justify-center py-20 text-gray-500">
+             <Loader2 className="animate-spin mr-2"/> Cargando rutinas...
+           </div>
+        ) : filteredRoutines.length === 0 ? (
+           <div className="col-span-full text-center py-20 text-gray-500 bg-[#111111] rounded-xl border border-gray-800">
+             <ClipboardList size={48} className="mx-auto mb-4 opacity-20"/>
+             <p>No hay rutinas creadas aún.</p>
+           </div>
+        ) : (
+          filteredRoutines.map(rutina => (
+            <div key={rutina._id} className="bg-[#111111] p-5 rounded-xl border border-gray-800 hover:border-blue-500/50 transition-all group relative">
+              
+              {/* Encabezado Card */}
+              <div className="flex justify-between items-start mb-4">
+                <div className="flex items-center gap-3">
+                  <div className="p-3 bg-blue-900/20 text-blue-400 rounded-lg">
+                    <ClipboardList size={24} />
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-lg text-white">{rutina.nombre}</h3>
+                    <p className="text-xs text-gray-400">
+                        {/* Como el backend devuelve solo el ID, mostramos ID por ahora */}
+                        Cliente ID: ...{rutina.usuarioId.toString().slice(-4)}
+                    </p>
+                  </div>
                 </div>
+                
+                {/* Botón menú */}
+                <button onClick={() => toggleMenu(rutina._id)} className="text-gray-500 hover:text-white">
+                  <MoreHorizontal size={20} />
+                </button>
               </div>
-              <button className="text-gray-500 hover:text-white p-1">
-                <MoreVertical size={18} />
-              </button>
-            </div>
 
-            {/* Stats de la Rutina */}
-            <div className="flex items-center gap-4 text-sm text-gray-400 mb-6 bg-gray-900/50 p-3 rounded-lg border border-gray-800">
-              <div className="flex items-center gap-1.5">
-                <Dumbbell size={14} className="text-blue-500" />
-                <span>{routine.exercisesCount} Ejercicios</span>
+              {/* Descripción */}
+              <p className="text-gray-400 text-sm mb-4 line-clamp-2 min-h-[40px]">
+                {rutina.descripcion || "Sin descripción"}
+              </p>
+
+              {/* Footer Card */}
+              <div className="pt-4 border-t border-gray-800 flex justify-between items-center text-sm">
+                <span className="bg-gray-800 px-2 py-1 rounded text-gray-300 text-xs">
+                  {rutina.ejerciciosIDs ? rutina.ejerciciosIDs.length : 0} Ejercicios
+                </span>
+                <Link to={`/routines/${rutina._id}`} className="text-blue-400 hover:underline">
+                  Ver detalles
+                </Link>
               </div>
-              <div className="w-px h-4 bg-gray-700"></div>
-              <div className="flex items-center gap-1.5">
-                <Calendar size={14} className="text-purple-500" />
-                <span>{routine.frequency}</span>
-              </div>
-            </div>
 
-            {/* Footer / Acciones */}
-            <div className="flex items-center justify-between pt-4 border-t border-gray-800">
-              <span className="text-xs text-gray-600 font-medium">
-                Editado: {routine.lastEdited}
-              </span>
-              <button className="flex items-center gap-2 text-sm font-medium text-white hover:text-blue-400 transition-colors">
-                <Play size={16} fill="currentColor" />
-                Ver Detalle
-              </button>
+              {/* Menú Flotante (Absolute) */}
+              {activeMenu === rutina._id && (
+                <div className="absolute top-12 right-4 w-40 bg-[#1a1a1a] border border-gray-700 rounded-xl shadow-2xl z-10 overflow-hidden flex flex-col animate-in fade-in zoom-in-95 duration-100">
+                  <button className="flex items-center gap-3 px-4 py-3 text-sm text-gray-300 hover:bg-gray-800 hover:text-white text-left">
+                    <Edit2 size={16} className="text-blue-500"/> Editar
+                  </button>
+                  <button 
+                    onClick={() => handleDelete(rutina._id)}
+                    className="flex items-center gap-3 px-4 py-3 text-sm text-red-400 hover:bg-red-900/20 hover:text-red-300 text-left"
+                  >
+                    <Trash2 size={16} /> Eliminar
+                  </button>
+                </div>
+              )}
             </div>
-
-          </Card>
-        ))}
+          ))
+        )}
       </div>
     </div>
   )
