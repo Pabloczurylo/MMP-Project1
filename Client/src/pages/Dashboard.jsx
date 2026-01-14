@@ -1,75 +1,44 @@
 import { useState, useEffect } from 'react'
-import { Users, Dumbbell, TrendingUp, Plus, Calendar, ArrowUpRight, ClipboardList, Loader2 } from 'lucide-react'
+import { Users, Dumbbell, TrendingUp, Plus, Calendar, ClipboardList, Loader2 } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import Card from '../components/ui/Card'
 
 const Dashboard = () => {
-  // 1. Estados para métricas reales
-  const [metrics, setMetrics] = useState({
-    users: 0,
-    routines: 0,
-    exercises: 0
-  })
+  const [metrics, setMetrics] = useState({ users: 0, routines: 0, exercises: 0 })
   const [loading, setLoading] = useState(true)
 
-  // 2. Fetch de datos reales al cargar
   useEffect(() => {
     const loadDashboardData = async () => {
       try {
-        // Hacemos las 3 peticiones en paralelo para que sea súper rápido
         const [resUsers, resRoutines, resExercises] = await Promise.all([
           fetch('http://localhost:3000/api/users'),
           fetch('http://localhost:3000/api/rutinas'),
           fetch('http://localhost:3000/api/ejercicios')
         ])
-
         const users = await resUsers.json()
         const routines = await resRoutines.json()
         const exercises = await resExercises.json()
 
-        // Guardamos solo la cantidad (length)
         setMetrics({
           users: Array.isArray(users) ? users.length : 0,
           routines: Array.isArray(routines) ? routines.length : 0,
           exercises: Array.isArray(exercises) ? exercises.length : 0
         })
-
       } catch (error) {
         console.error("Error cargando dashboard:", error)
       } finally {
         setLoading(false)
       }
     }
-
     loadDashboardData()
   }, [])
 
-  // Configuración de las Tarjetas (Ahora usan metrics.x)
   const stats = [
-    { 
-      label: 'Clientes Registrados', 
-      value: metrics.users, 
-      icon: Users, 
-      color: 'text-blue-500', 
-      trend: 'Total histórico' 
-    },
-    { 
-      label: 'Rutinas Activas', 
-      value: metrics.routines, 
-      icon: ClipboardList, // Cambié a Clipboard para representar "Plan"
-      color: 'text-purple-500', 
-      trend: 'Asignadas' 
-    },
-    { 
-      label: 'Ejercicios en Banco', // Cambiado de "Sesiones" a "Ejercicios"
-      value: metrics.exercises, 
-      icon: Dumbbell, 
-      color: 'text-green-500', 
-      trend: 'Disponibles' 
-    },
+    { label: 'Clientes Registrados', value: metrics.users, icon: Users, color: 'text-blue-500', trend: 'Total histórico' },
+    { label: 'Rutinas Activas', value: metrics.routines, icon: ClipboardList, color: 'text-purple-500', trend: 'Asignadas' },
+    { label: 'Ejercicios en Banco', value: metrics.exercises, icon: Dumbbell, color: 'text-green-500', trend: 'Disponibles' },
   ]
 
-  // Actividad Reciente (Mantenemos Mock por ahora hasta tener logs reales)
   const recentActivity = [
     { id: 1, text: "Juan Pérez completó 'Hipertrofia Piernas'", time: "Hace 10 min", type: "success" },
     { id: 2, text: "María Gonzalez actualizó su peso (65kg)", time: "Hace 2 horas", type: "info" },
@@ -101,7 +70,7 @@ const Dashboard = () => {
         </div>
       </div>
 
-      {/* Métricas Clave (Stats) */}
+      {/* Métricas */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {stats.map((stat, index) => (
           <Card key={index} className="p-6 flex items-start justify-between group hover:border-blue-500/30 transition-all cursor-default">
@@ -122,12 +91,11 @@ const Dashboard = () => {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         
-        {/* Accesos Rápidos (2/3 de ancho) */}
+        {/* Accesos Rápidos */}
         <div className="lg:col-span-2 space-y-6">
           <h2 className="text-xl font-bold text-white">Accesos Rápidos</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             
-            {/* Botón Nuevo Cliente */}
             <Link to="/clients/new" className="group">
               <div className="p-6 h-full bg-gray-900 border border-gray-800 rounded-2xl hover:border-blue-500/50 hover:bg-blue-900/10 transition-all flex items-center gap-5 cursor-pointer relative overflow-hidden">
                 <div className="bg-blue-600 rounded-xl p-4 text-white group-hover:scale-110 transition-transform shadow-lg shadow-blue-900/20 z-10">
@@ -137,31 +105,27 @@ const Dashboard = () => {
                   <h3 className="font-bold text-white text-lg group-hover:text-blue-400 transition-colors">Nuevo Cliente</h3>
                   <p className="text-sm text-gray-400 mt-1">Registrar usuario</p>
                 </div>
-                {/* Decoración */}
                 <div className="absolute -right-6 -bottom-6 w-24 h-24 bg-blue-500/10 rounded-full blur-2xl group-hover:bg-blue-500/20 transition-all"></div>
               </div>
             </Link>
 
-            {/* Botón Crear Rutina */}
             <Link to="/routines/new" className="group">
               <div className="p-6 h-full bg-gray-900 border border-gray-800 rounded-2xl hover:border-purple-500/50 hover:bg-purple-900/10 transition-all flex items-center gap-5 cursor-pointer relative overflow-hidden">
                 <div className="bg-purple-600 rounded-xl p-4 text-white group-hover:scale-110 transition-transform shadow-lg shadow-purple-900/20 z-10">
-                  <ClipboardList size={28} /> {/* Icono actualizado */}
+                  <ClipboardList size={28} />
                 </div>
                 <div className="z-10">
                   <h3 className="font-bold text-white text-lg group-hover:text-purple-400 transition-colors">Crear Rutina</h3>
                   <p className="text-sm text-gray-400 mt-1">Diseñar plan</p>
                 </div>
-                {/* Decoración */}
                 <div className="absolute -right-6 -bottom-6 w-24 h-24 bg-purple-500/10 rounded-full blur-2xl group-hover:bg-purple-500/20 transition-all"></div>
               </div>
             </Link>
 
           </div>
 
-          {/* Banner de Agenda */}
-          <div className="p-6 bg-gradient-to-r from-gray-900 to-gray-800 border border-gray-700/50 rounded-2xl flex items-center justify-between">
-            <div className="flex items-center gap-4">
+          {/* Banner de Agenda (SIN BOTÓN) */}
+          <div className="p-6 bg-gradient-to-r from-gray-900 to-gray-800 border border-gray-700/50 rounded-2xl flex items-center gap-4">
               <div className="p-3 bg-gray-800 rounded-full text-gray-300 border border-gray-700">
                 <Calendar size={24} />
               </div>
@@ -169,18 +133,13 @@ const Dashboard = () => {
                 <h3 className="font-bold text-white text-lg">Agenda Semanal</h3>
                 <p className="text-gray-400 text-sm">No tienes revisiones pendientes para hoy.</p>
               </div>
-            </div>
-            <button className="text-sm font-medium text-white hover:text-blue-400 flex items-center gap-1 transition-colors">
-              Ver calendario <ArrowUpRight size={16} />
-            </button>
           </div>
         </div>
 
-        {/* Actividad Reciente (Sidebar derecho) */}
+        {/* Actividad Reciente (SIN BOTÓN) */}
         <div className="lg:col-span-1">
           <div className="flex items-center justify-between mb-6">
-            <h2 className="text-xl font-bold text-white">Actividad</h2>
-            <button className="text-xs text-blue-400 hover:text-blue-300 font-medium">Ver todo</button>
+            <h2 className="text-xl font-bold text-white">Actividad Reciente</h2>
           </div>
           
           <div className="bg-gray-900 border border-gray-800 rounded-2xl overflow-hidden">
@@ -198,8 +157,8 @@ const Dashboard = () => {
             ))}
           </div>
         </div>
-
       </div>
+
     </div>
   )
 }
