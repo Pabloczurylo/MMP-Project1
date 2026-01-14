@@ -1,16 +1,85 @@
+
+import { useEffect, useState, useRef } from 'react'
 import { Search, Plus, MoreVertical, Mail, Phone } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import Card from '../components/ui/Card'
 
+const defaultClients = [
+  { id: 1, name: "Ana García", plan: "Pérdida de Peso", status: "Activo", email: "ana@email.com", phone: "+54 9 11 1234-5678" },
+  { id: 2, name: "Carlos Ruiz", plan: "Hipertrofia", status: "Pendiente", email: "carlos@email.com", phone: "+54 9 11 8765-4321" },
+  { id: 3, name: "Lucía Mendez", plan: "Funcional", status: "Activo", email: "lucia@email.com", phone: "+54 9 11 5555-6666" },
+  { id: 4, name: "Marcos Diaz", plan: "Rehabilitación", status: "Inactivo", email: "marcos@email.com", phone: "+54 9 11 9999-0000" },
+  { id: 5, name: "Sofia Perez", plan: "Crossfit", status: "Activo", email: "sofia@email.com", phone: "+54 9 11 1111-2222" },
+]
+
 const Clients = () => {
-  // Datos simulados
-  const clients = [
-    { id: 1, name: "Ana García", plan: "Pérdida de Peso", status: "Activo", email: "ana@email.com", phone: "+54 9 11 1234-5678" },
-    { id: 2, name: "Carlos Ruiz", plan: "Hipertrofia", status: "Pendiente", email: "carlos@email.com", phone: "+54 9 11 8765-4321" },
-    { id: 3, name: "Lucía Mendez", plan: "Funcional", status: "Activo", email: "lucia@email.com", phone: "+54 9 11 5555-6666" },
-    { id: 4, name: "Marcos Diaz", plan: "Rehabilitación", status: "Inactivo", email: "marcos@email.com", phone: "+54 9 11 9999-0000" },
-    { id: 5, name: "Sofia Perez", plan: "Crossfit", status: "Activo", email: "sofia@email.com", phone: "+54 9 11 1111-2222" },
-  ]
+  const [clients, setClients] = useState(() => {
+    const stored = localStorage.getItem('clients')
+    return stored ? JSON.parse(stored) : defaultClients
+  })
+  const [searchTerm, setSearchTerm] = useState('')
+  const [openMenu, setOpenMenu] = useState(null)
+  const [openStatus, setOpenStatus] = useState(null)
+  const pageRef = useRef(null)
+
+  useEffect(() => {
+    const sync = () => {
+      const stored = localStorage.getItem('clients')
+      setClients(stored ? JSON.parse(stored) : defaultClients)
+    }
+
+    // Initial sync and listen for changes from other tabs
+    sync()
+    window.addEventListener('storage', sync)
+    return () => window.removeEventListener('storage', sync)
+  }, [])
+
+  useEffect(() => {
+    const handleDocClick = (e) => {
+      // if click is inside a menu or its toggle, do nothing
+      if (e.target.closest && (
+        e.target.closest('[data-menu]') ||
+        e.target.closest('[data-menu-toggle]') ||
+        e.target.closest('[data-status-menu]') ||
+        e.target.closest('[data-status-toggle]')
+      )) return
+      setOpenMenu(null)
+      setOpenStatus(null)
+    }
+    document.addEventListener('click', handleDocClick)
+    return () => document.removeEventListener('click', handleDocClick)
+  }, [])
+
+  const toggleMenu = (id) => {
+    setOpenMenu(prev => prev === id ? null : id)
+  }
+
+  const toggleStatus = (id) => {
+    setOpenStatus(prev => prev === id ? null : id)
+  }
+
+  const updateStatus = (id, status) => {
+    const updated = clients.map(c => c.id === id ? { ...c, status } : c)
+    setClients(updated)
+    localStorage.setItem('clients', JSON.stringify(updated))
+    setOpenStatus(null)
+  }
+
+  const deleteClient = (id) => {
+    const updated = clients.filter(c => c.id !== id)
+    setClients(updated)
+    localStorage.setItem('clients', JSON.stringify(updated))
+    setOpenMenu(null)
+  }
+
+  const q = searchTerm.trim().toLowerCase()
+  const filteredClients = q
+    ? clients.filter(c => (
+        (c.name && c.name.toLowerCase().includes(q)) ||
+        (c.email && c.email.toLowerCase().includes(q)) ||
+        (c.plan && c.plan.toLowerCase().includes(q))
+      ))
+    : clients
 
   return (
     <div className="space-y-6">
@@ -30,11 +99,13 @@ const Clients = () => {
       </div>
 
       {/* 2. Barra de Búsqueda */}
-      <Card className="p-4">
+          <Card className="p-4">
         <div className="relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" size={20} />
           <input 
             type="text" 
+            value={searchTerm}
+            onChange={e => setSearchTerm(e.target.value)}
             placeholder="Buscar por nombre, email o plan..." 
             className="w-full bg-gray-950 border border-gray-800 text-white pl-10 pr-4 py-2 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 placeholder-gray-600"
           />
@@ -44,7 +115,7 @@ const Clients = () => {
       {/* 3. Vista de Clientes Responsive */}
       {/* Versión móvil: Lista de tarjetas */}
       <div className="block sm:hidden space-y-4 overflow-x-hidden">
-        {clients.map((client) => (
+        {filteredClients.map((client) => (
           <Card key={client.id} className="p-4 overflow-hidden">
             <div className="flex items-center gap-3 mb-3">
               <div className="w-10 h-10 rounded-full bg-gray-700 flex items-center justify-center text-white font-bold">
@@ -64,20 +135,35 @@ const Clients = () => {
             </div>
             <div className="flex justify-between items-center">
               <div className="min-w-0 flex-1">
-                <span className="px-2 py-1 bg-gray-800 rounded text-gray-300 border border-gray-700 text-sm truncate inline-block mr-2">
+                <span className={`px-2 py-1 bg-gray-800 rounded text-gray-300 border border-gray-700 text-sm truncate inline-block mr-2`}>
                   {client.plan}
                 </span>
-                <span className={`px-2 py-1 rounded-full text-xs font-medium border truncate inline-block ${
-                  client.status === 'Activo' ? 'bg-green-500/10 text-green-500 border-green-500/20' :
-                  client.status === 'Pendiente' ? 'bg-yellow-500/10 text-yellow-500 border-yellow-500/20' :
-                  'bg-red-500/10 text-red-500 border-red-500/20'
-                }`}>
-                  {client.status}
-                </span>
+                <div className="relative inline-block">
+                  <button data-status-toggle onClick={() => toggleStatus(client.id)} className={`px-2 py-1 rounded-full text-xs font-medium border truncate inline-block ${
+                    client.status === 'Activo' ? 'bg-green-500/10 text-green-500 border-green-500/20' :
+                    client.status === 'Pendiente' ? 'bg-gray-800 text-gray-200 border-gray-700' :
+                    'bg-red-500/10 text-red-500 border-red-500/20'
+                  }`}>{client.status}</button>
+                  {openStatus === client.id && (
+                    <div data-status-menu className="absolute right-0 mt-2 w-40 bg-gray-900 border border-gray-800 rounded shadow-lg z-50 flex flex-col">
+                      <button onClick={() => updateStatus(client.id, 'Activo')} className="block w-full text-left px-4 py-2 hover:bg-green-600/20 text-green-400">Activo</button>
+                      <button onClick={() => updateStatus(client.id, 'Pendiente')} className="block w-full text-left px-4 py-2 hover:bg-gray-800 text-gray-200">Pendiente</button>
+                      <button onClick={() => updateStatus(client.id, 'Inactivo')} className="block w-full text-left px-4 py-2 hover:bg-red-600 text-red-400">Inactivo</button>
+                    </div>
+                  )}
+                </div>
               </div>
-              <button className="text-gray-500 hover:text-white p-2 rounded-lg hover:bg-gray-700 transition-colors flex-shrink-0">
-                <MoreVertical size={18} />
-              </button>
+              <div className="relative">
+                <button data-menu-toggle onClick={() => toggleMenu(client.id)} className="text-gray-500 hover:text-white p-2 rounded-lg hover:bg-gray-700 transition-colors flex-shrink-0">
+                  <MoreVertical size={18} />
+                </button>
+                {openMenu === client.id && (
+                  <div data-menu className="absolute right-0 mt-2 w-40 bg-gray-900 border border-gray-800 rounded shadow-lg z-50">
+                    <Link to={`/clients/new?id=${client.id}`} className="block w-full text-left px-4 py-2 hover:bg-gray-800 hover:text-white text-gray-200">Editar</Link>
+                    <button onClick={() => deleteClient(client.id)} className="w-full text-left px-4 py-2 hover:bg-red-600 hover:text-white text-red-400">Eliminar</button>
+                  </div>
+                )}
+              </div>
             </div>
           </Card>
         ))}
@@ -106,7 +192,7 @@ const Clients = () => {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-800">
-              {clients.map((client) => (
+              {filteredClients.map((client) => (
                 <tr key={client.id} className="hover:bg-gray-800/50 transition-colors group">
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-3">
@@ -132,18 +218,35 @@ const Clients = () => {
                     </span>
                   </td>
                   <td className="px-6 py-4">
-                    <span className={`px-2 py-1 rounded-full text-xs font-medium border ${
-                      client.status === 'Activo' ? 'bg-green-500/10 text-green-500 border-green-500/20' :
-                      client.status === 'Pendiente' ? 'bg-yellow-500/10 text-yellow-500 border-yellow-500/20' :
-                      'bg-red-500/10 text-red-500 border-red-500/20'
-                    }`}>
-                      {client.status}
-                    </span>
+                    <div className="relative inline-block">
+                      <button data-status-toggle onClick={() => toggleStatus(client.id)} className={`px-2 py-1 rounded-full text-xs font-medium border ${
+                        client.status === 'Activo' ? 'bg-green-500/10 text-green-500 border-green-500/20' :
+                        client.status === 'Pendiente' ? 'bg-gray-800 text-gray-200 border-gray-700' :
+                        'bg-red-500/10 text-red-500 border-red-500/20'
+                      }`}>
+                        {client.status}
+                      </button>
+                      {openStatus === client.id && (
+                        <div data-status-menu className="absolute right-0 mt-2 w-40 bg-gray-900 border border-gray-800 rounded shadow-lg z-50 flex flex-col">
+                          <button onClick={() => updateStatus(client.id, 'Activo')} className="block w-full text-left px-4 py-2 hover:bg-green-600/20 text-green-400">Activo</button>
+                          <button onClick={() => updateStatus(client.id, 'Pendiente')} className="block w-full text-left px-4 py-2 hover:bg-gray-800 text-gray-200">Pendiente</button>
+                          <button onClick={() => updateStatus(client.id, 'Inactivo')} className="block w-full text-left px-4 py-2 hover:bg-red-600 text-red-400">Inactivo</button>
+                        </div>
+                      )}
+                    </div>
                   </td>
                   <td className="px-6 py-4 text-right">
-                    <button className="text-gray-500 hover:text-white p-2 rounded-lg hover:bg-gray-700 transition-colors">
-                      <MoreVertical size={18} />
-                    </button>
+                    <div className="relative inline-block">
+                      <button data-menu-toggle onClick={() => toggleMenu(client.id)} className="text-gray-500 hover:text-white p-2 rounded-lg hover:bg-gray-700 transition-colors">
+                        <MoreVertical size={18} />
+                      </button>
+                      {openMenu === client.id && (
+                        <div data-menu className="absolute right-0 mt-2 w-40 bg-gray-900 border border-gray-800 rounded shadow-lg z-50">
+                          <Link to={`/clients/new?id=${client.id}`} className="block w-full text-left px-4 py-2 hover:bg-gray-800 hover:text-white text-gray-200">Editar</Link>
+                          <button onClick={() => deleteClient(client.id)} className="w-full text-left px-4 py-2 hover:bg-red-600 hover:text-white text-red-400">Eliminar</button>
+                        </div>
+                      )}
+                    </div>
                   </td>
                 </tr>
               ))}

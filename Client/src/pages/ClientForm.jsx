@@ -1,16 +1,101 @@
+import { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { User, Mail, Phone, Target, FileText, Save, X } from 'lucide-react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useNavigate, useLocation } from 'react-router-dom'
 
 const ClientForm = () => {
-  const { register, handleSubmit, formState: { errors } } = useForm()
+  const { register, handleSubmit, formState: { errors }, reset } = useForm()
   const navigate = useNavigate()
+  const location = useLocation()
+  const isEditing = Boolean(new URLSearchParams(location.search).get('id'))
+
+  // Check if editing an existing client via query param ?id=
+  useEffect(() => {
+    const params = new URLSearchParams(location.search)
+    const id = params.get('id')
+    if (!id) return
+
+    const stored = localStorage.getItem('clients')
+    const clients = stored ? JSON.parse(stored) : []
+    const client = clients.find(c => String(c.id) === String(id))
+    if (!client) return
+
+    // reverse map plan to goal value used in form
+    const reversePlan = {
+      'Pérdida de Peso': 'perdida_peso',
+      'Hipertrofia': 'hipertrofia',
+      'Resistencia / Cardio': 'resistencia',
+      'Fuerza / Powerlifting': 'fuerza',
+      'Salud General': 'salud',
+    }
+
+    const goalVal = reversePlan[client.plan] || ''
+
+    // set default values in the form
+    const values = {
+      fullName: client.name,
+      email: client.email || '',
+      phone: client.phone || '',
+      age: client.age || '',
+      goal: goalVal,
+      notes: client.notes || ''
+    }
+
+    // reset form values
+    reset(values)
+  }, [location.search])
 
   const onSubmit = (data) => {
-    console.log("Nuevo Cliente:", data)
-    // Aquí conectaremos con el Backend después
-    alert("Cliente registrado (simulado)")
-    navigate('/dashboard')
+    const params = new URLSearchParams(location.search)
+    const id = params.get('id')
+
+    const stored = localStorage.getItem('clients')
+    const clients = stored ? JSON.parse(stored) : []
+
+    const planMap = {
+      perdida_peso: 'Pérdida de Peso',
+      hipertrofia: 'Hipertrofia',
+      resistencia: 'Resistencia / Cardio',
+      fuerza: 'Fuerza / Powerlifting',
+      salud: 'Salud General'
+    }
+
+    if (id) {
+      // edit existing
+      const updated = clients.map(c => {
+        if (String(c.id) === String(id)) {
+          return {
+            ...c,
+            name: data.fullName,
+            plan: planMap[data.goal] || data.goal || c.plan,
+            email: data.email || '',
+            phone: data.phone || '',
+            notes: data.notes || c.notes || ''
+          }
+        }
+        return c
+      })
+      localStorage.setItem('clients', JSON.stringify(updated))
+      alert('Cliente actualizado')
+      navigate('/clients')
+      return
+    }
+
+    // create new
+    const nextId = clients.length ? Math.max(...clients.map(c => c.id)) + 1 : 1
+    const newClient = {
+      id: nextId,
+      name: data.fullName,
+      plan: planMap[data.goal] || data.goal || 'General',
+      status: 'Activo',
+      email: data.email || '',
+      phone: data.phone || '',
+      notes: data.notes || ''
+    }
+    clients.unshift(newClient)
+    localStorage.setItem('clients', JSON.stringify(clients))
+    alert('Cliente registrado')
+    navigate('/clients')
   }
 
   return (
@@ -18,7 +103,7 @@ const ClientForm = () => {
       {/* Encabezado */}
       <div className="flex items-center justify-between mb-8">
         <div>
-          <h1 className="text-3xl font-bold text-white">Nuevo Cliente</h1>
+          <h1 className="text-3xl font-bold text-white">{isEditing ? 'Editar Cliente' : 'Nuevo Cliente'}</h1>
           <p className="text-gray-400 mt-1">Registra los datos personales y objetivos.</p>
         </div>
         <Link 
@@ -149,7 +234,7 @@ const ClientForm = () => {
             className="px-6 py-3 rounded-xl bg-blue-600 text-white font-bold hover:bg-blue-700 transition-colors flex items-center gap-2 shadow-lg shadow-blue-900/20"
           >
             <Save size={20} />
-            Guardar Cliente
+            {isEditing ? 'Actualizar Cliente' : 'Guardar Cliente'}
           </button>
         </div>
 
