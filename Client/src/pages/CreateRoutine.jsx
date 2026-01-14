@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { Link, useNavigate } from 'react-router-dom'
 import { ArrowLeft, Save, Loader2, Search, CheckCircle, Circle } from 'lucide-react'
+import ConfirmModal from '../components/ConfirmModal' 
 
 const CreateRoutine = () => {
   const navigate = useNavigate()
@@ -10,16 +11,18 @@ const CreateRoutine = () => {
   // Estados para datos externos
   const [clients, setClients] = useState([])
   const [exercises, setExercises] = useState([])
-  const [selectedExercises, setSelectedExercises] = useState([]) // Array de IDs seleccionados
+  const [selectedExercises, setSelectedExercises] = useState([]) 
   const [loadingData, setLoadingData] = useState(true)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [searchTerm, setSearchTerm] = useState('')
+
+  // Estado para el Modal de Éxito
+  const [showSuccessModal, setShowSuccessModal] = useState(false) // <--- 2. Nuevo estado
 
   // Cargar Clientes y Ejercicios al iniciar
   useEffect(() => {
     const loadData = async () => {
       try {
-        // Ejecutamos las dos peticiones en paralelo
         const [resUsers, resExercises] = await Promise.all([
           fetch('http://localhost:3000/api/users'),
           fetch('http://localhost:3000/api/ejercicios')
@@ -59,12 +62,11 @@ const CreateRoutine = () => {
 
     setIsSubmitting(true)
     try {
-      // Armamos el objeto tal cual lo pide el Backend
       const payload = {
         nombre: data.nombre,
         descripcion: data.descripcion,
-        usuarioId: data.usuarioId, // El ID del cliente seleccionado
-        ejerciciosIDs: selectedExercises // Array de IDs de ejercicios
+        usuarioId: data.usuarioId,
+        ejerciciosIDs: selectedExercises 
       }
 
       const response = await fetch('http://localhost:3000/api/rutinas', {
@@ -74,8 +76,8 @@ const CreateRoutine = () => {
       })
 
       if (response.ok) {
-        alert('¡Rutina asignada correctamente!')
-        navigate('/routines')
+        // 3. Activamos el modal en vez de alertar y redirigir
+        setShowSuccessModal(true)
       } else {
         const errorData = await response.json()
         alert('Error: ' + (errorData.error || 'No se pudo crear'))
@@ -86,6 +88,12 @@ const CreateRoutine = () => {
     } finally {
       setIsSubmitting(false)
     }
+  }
+
+  // 4. Función para redirigir al cerrar el modal
+  const handleSuccessClose = () => {
+    setShowSuccessModal(false)
+    navigate('/routines')
   }
 
   // Filtrar ejercicios visualmente
@@ -160,7 +168,7 @@ const CreateRoutine = () => {
              </span>
           </div>
 
-          {/* Buscador de ejercicios pequeño */}
+          {/* Buscador de ejercicios */}
           <div className="relative">
             <input
                 type="text"
@@ -171,7 +179,7 @@ const CreateRoutine = () => {
             <Search className="absolute left-3 top-2.5 text-gray-500" size={16} />
           </div>
 
-          {/* Lista de ejercicios seleccionable */}
+          {/* Lista de ejercicios */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
             {filteredExercises.map(ex => {
               const isSelected = selectedExercises.includes(ex._id)
@@ -216,6 +224,16 @@ const CreateRoutine = () => {
         </div>
 
       </form>
+
+      {/* 5. Renderizar el Modal al final */}
+      <ConfirmModal 
+        isOpen={showSuccessModal}
+        onClose={handleSuccessClose}
+        onConfirm={handleSuccessClose}
+        title="¡Rutina Creada!"
+        message="La rutina se ha asignado correctamente al cliente seleccionado."
+        type="success"
+      />
     </div>
   )
 }

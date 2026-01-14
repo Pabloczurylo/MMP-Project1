@@ -2,29 +2,29 @@ import { useForm } from 'react-hook-form'
 import { Link, useNavigate } from 'react-router-dom'
 import { ArrowLeft, Save, Loader2 } from 'lucide-react'
 import { useState } from 'react'
+import ConfirmModal from '../components/ConfirmModal' 
 
 const ExerciseForm = () => {
   const navigate = useNavigate()
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [showSuccessModal, setShowSuccessModal] = useState(false) // <--- 2. Estado para el modal de éxito
   
-  // React Hook Form gestiona los campos
   const { register, handleSubmit, formState: { errors } } = useForm()
 
   const onSubmit = async (data) => {
     setIsSubmitting(true)
     try {
-      // Petición al Backend real
       const response = await fetch('http://localhost:3000/api/ejercicios', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(data), // Enviamos los datos del formulario
+        body: JSON.stringify(data),
       })
 
       if (response.ok) {
-        alert('¡Ejercicio guardado con éxito!')
-        navigate('/exercises') // Volvemos a la lista
+        // 3. ¡Éxito! Mostramos el modal en lugar del alert feo
+        setShowSuccessModal(true)
       } else {
         const errorData = await response.json()
         alert('Error: ' + (errorData.error || 'No se pudo guardar'))
@@ -35,6 +35,12 @@ const ExerciseForm = () => {
     } finally {
       setIsSubmitting(false)
     }
+  }
+
+  // 4. Esta función se ejecuta al cerrar el modal de éxito
+  const handleCloseModal = () => {
+    setShowSuccessModal(false)
+    navigate('/exercises') // Ahora sí nos vamos a la lista
   }
 
   return (
@@ -79,7 +85,7 @@ const ExerciseForm = () => {
           {errors.musculo && <span className="text-red-500 text-sm">{errors.musculo.message}</span>}
         </div>
 
-        {/* Series y Repeticiones (Requeridos por el Backend) */}
+        {/* Series y Repeticiones */}
         <div className="grid grid-cols-2 gap-4">
           <div className="space-y-2">
             <label className="block text-sm font-medium text-gray-400">Series</label>
@@ -134,6 +140,16 @@ const ExerciseForm = () => {
           {isSubmitting ? 'Guardando...' : 'Guardar Ejercicio'}
         </button>
       </form>
+
+      {/* 5. Renderizamos el Modal de Éxito al final */}
+      <ConfirmModal 
+        isOpen={showSuccessModal}
+        onClose={handleCloseModal}     // Si cierra con la X
+        onConfirm={handleCloseModal}   // Si cierra con el botón "Entendido"
+        title="¡Excelente!"
+        message="El ejercicio ha sido guardado correctamente en la base de datos."
+        type="success"
+      />
     </div>
   )
 }
