@@ -10,6 +10,7 @@ import CreateRoutine from './pages/CreateRoutine'
 import Routines from './pages/Routines'
 import ExercisesList from './pages/ExercisesList'
 import ExerciseForm from './pages/ExerciseForm'
+import RoutineDetail from './pages/RoutineDetail';
 
 
 function App() {
@@ -36,6 +37,11 @@ function App() {
         {/* Rutas de Rutinas */}
         <Route path="/routines/new" element={<CreateRoutine />} />
         <Route path="/routines" element={<Routines />} />
+        <Route path="/routines/:id" element={<RoutineDetail />} />
+
+        {/* Rutas de Edición */}
+        <Route path="/exercises/edit/:id" element={<ExerciseForm />} />
+        <Route path="/routines/edit/:id" element={<CreateRoutine />} />
       </Route>
 
       {/* 3. Redirección si la ruta no existe */}
