@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react'
 import { Search, Plus, Dumbbell, MoreHorizontal, Edit2, Trash2, RefreshCw, Loader2 } from 'lucide-react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom' // <--- Importamos useNavigate
 import ConfirmModal from '../components/ConfirmModal'
 
 const ExercisesList = () => {
+  const navigate = useNavigate() // <--- Inicializamos el hook para poder redirigir
+  
   const [exercises, setExercises] = useState([])
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')
@@ -184,15 +186,18 @@ const ExercisesList = () => {
                         {/* Menú Flotante */}
                         {activeMenu === ex._id && (
                         <div className="absolute right-10 top-2 w-40 bg-[#1a1a1a] border border-gray-700 rounded-xl shadow-2xl z-50 overflow-hidden flex flex-col animate-in fade-in zoom-in-95 duration-100">
+                            {/* BOTÓN EDITAR CONECTADO */}
                             <button 
                             className="flex items-center gap-3 px-4 py-3 text-sm text-gray-300 hover:bg-gray-800 hover:text-white text-left transition-colors"
-                            onClick={() => alert(`Editando: ${ex.nombre}`)}
+                            onClick={() => navigate(`/exercises/edit/${ex._id}`)} // <--- Navegación al formulario de edición
                             >
                             <Edit2 size={16} className="text-blue-500"/>
                             Editar
                             </button>
+                            
                             <div className="h-[1px] bg-gray-800"></div>
-                            {/* Botón Eliminar: Llama a confirmDelete */}
+                            
+                            {/* Botón Eliminar */}
                             <button 
                             className="flex items-center gap-3 px-4 py-3 text-sm text-red-400 hover:bg-red-900/20 hover:text-red-300 text-left transition-colors"
                             onClick={() => confirmDelete(ex._id)} 

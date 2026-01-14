@@ -38,6 +38,10 @@ function App() {
         <Route path="/routines/new" element={<CreateRoutine />} />
         <Route path="/routines" element={<Routines />} />
         <Route path="/routines/:id" element={<RoutineDetail />} />
+
+        {/* Rutas de Edición */}
+        <Route path="/exercises/edit/:id" element={<ExerciseForm />} />
+        <Route path="/routines/edit/:id" element={<CreateRoutine />} />
       </Route>
 
       {/* 3. Redirección si la ruta no existe */}

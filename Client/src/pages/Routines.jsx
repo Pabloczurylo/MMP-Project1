@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react'
 import { Search, Plus, ClipboardList, MoreHorizontal, Trash2, Edit2, Loader2, RefreshCw, Eye } from 'lucide-react'
-import { Link } from 'react-router-dom'
-import ConfirmModal from '../components/ConfirmModal' 
+import { Link, useNavigate } from 'react-router-dom' // <--- 1. Importar useNavigate
+import ConfirmModal from '../components/ConfirmModal'
 
 const Routines = () => {
+  const navigate = useNavigate() // <--- 2. Inicializar hook
+  
   const [routines, setRoutines] = useState([])
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')
@@ -28,14 +30,14 @@ const Routines = () => {
 
   useEffect(() => { fetchRoutines() }, [])
 
-  //  En lugar de borrar directo, abrimos el modal
+  // En lugar de borrar directo, abrimos el modal
   const confirmDelete = (id) => {
     setRoutineToDelete(id)
     setShowModal(true)
     setActiveMenu(null) // Cerramos el menú flotante
   }
 
-  //  Esta función se ejecuta solo cuando le das "Sí, eliminar" en el modal
+  // Esta función se ejecuta solo cuando le das "Sí, eliminar" en el modal
   const handleDelete = async () => {
     if (!routineToDelete) return
 
@@ -64,7 +66,7 @@ const Routines = () => {
 
   return (
     <div className="max-w-6xl mx-auto space-y-6 text-white p-4">
-      {/* ... Header y Buscador (Igual que antes) ... */}
+      {/* Header y Buscador */}
       <div className="flex justify-between items-center gap-4">
         <div>
           <h1 className="text-2xl md:text-3xl font-bold">Mis Rutinas</h1>
@@ -93,65 +95,77 @@ const Routines = () => {
 
       {/* Grid de Rutinas */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {/* ... (Lógica de loading y empty state igual que antes) ... */}
-        {!loading && filteredRoutines.map(rutina => (
-            <div key={rutina._id} className="bg-[#111111] p-5 rounded-xl border border-gray-800 hover:border-blue-500/50 transition-all group relative">
-              <div className="flex justify-between items-start mb-4">
-                <div className="flex items-center gap-3">
-                  <div className="p-3 bg-blue-900/20 text-blue-400 rounded-lg">
-                    <ClipboardList size={24} />
-                  </div>
-                  <div>
-                    <h3 className="font-bold text-lg text-white">{rutina.nombre}</h3>
-                    {/* Aquí podrías buscar el nombre del cliente si tienes la lista completa, por ahora ID */}
-                    <p className="text-xs text-gray-400">Cliente: ...{rutina.usuarioId.toString().slice(-4)}</p>
-                  </div>
+        {loading ? (
+           <div className="col-span-full flex justify-center py-20 text-gray-500">
+             <Loader2 className="animate-spin mr-2"/> Cargando rutinas...
+           </div>
+        ) : filteredRoutines.length === 0 ? (
+           <div className="col-span-full text-center py-20 text-gray-500 bg-[#111111] rounded-xl border border-gray-800">
+             <ClipboardList size={48} className="mx-auto mb-4 opacity-20"/>
+             <p>No hay rutinas creadas aún.</p>
+           </div>
+        ) : (
+            filteredRoutines.map(rutina => (
+                <div key={rutina._id} className="bg-[#111111] p-5 rounded-xl border border-gray-800 hover:border-blue-500/50 transition-all group relative">
+                <div className="flex justify-between items-start mb-4">
+                    <div className="flex items-center gap-3">
+                    <div className="p-3 bg-blue-900/20 text-blue-400 rounded-lg">
+                        <ClipboardList size={24} />
+                    </div>
+                    <div>
+                        <h3 className="font-bold text-lg text-white">{rutina.nombre}</h3>
+                        <p className="text-xs text-gray-400">Cliente: ...{rutina.usuarioId.toString().slice(-4)}</p>
+                    </div>
+                    </div>
+                    <button onClick={() => toggleMenu(rutina._id)} className="text-gray-500 hover:text-white"><MoreHorizontal size={20} /></button>
                 </div>
-                <button onClick={() => toggleMenu(rutina._id)} className="text-gray-500 hover:text-white"><MoreHorizontal size={20} /></button>
-              </div>
 
-              <p className="text-gray-400 text-sm mb-4 line-clamp-2 min-h-[40px]">
-                {rutina.descripcion || "Sin descripción"}
-              </p>
+                <p className="text-gray-400 text-sm mb-4 line-clamp-2 min-h-[40px]">
+                    {rutina.descripcion || "Sin descripción"}
+                </p>
 
-              <div className="pt-4 border-t border-gray-800 flex justify-between items-center text-sm">
-                <span className="bg-gray-800 px-2 py-1 rounded text-gray-300 text-xs">
-                  {rutina.ejerciciosIDs ? rutina.ejerciciosIDs.length : 0} Ejercicios
-                </span>
-                
-                {/* ENLACE AL DETALLE (Esto es lo que activaremos ahora) */}
-                <Link to={`/routines/${rutina._id}`} className="text-blue-400 hover:underline flex items-center gap-1">
-                  Ver detalle <Eye size={14}/>
-                </Link>
-              </div>
-
-              {activeMenu === rutina._id && (
-                <div className="absolute top-12 right-4 w-40 bg-[#1a1a1a] border border-gray-700 rounded-xl shadow-2xl z-10 overflow-hidden flex flex-col">
-                  {/* Botón Editar (Fake por ahora) */}
-                  <button className="flex items-center gap-3 px-4 py-3 text-sm text-gray-300 hover:bg-gray-800 hover:text-white text-left">
-                    <Edit2 size={16} className="text-blue-500"/> Editar
-                  </button>
-                  {/* Botón Eliminar con Modal */}
-                  <button 
-                    onClick={() => confirmDelete(rutina._id)}
-                    className="flex items-center gap-3 px-4 py-3 text-sm text-red-400 hover:bg-red-900/20 hover:text-red-300 text-left"
-                  >
-                    <Trash2 size={16} /> Eliminar
-                  </button>
+                <div className="pt-4 border-t border-gray-800 flex justify-between items-center text-sm">
+                    <span className="bg-gray-800 px-2 py-1 rounded text-gray-300 text-xs">
+                    {rutina.ejerciciosIDs ? rutina.ejerciciosIDs.length : 0} Ejercicios
+                    </span>
+                    
+                    <Link to={`/routines/${rutina._id}`} className="text-blue-400 hover:underline flex items-center gap-1">
+                    Ver detalle <Eye size={14}/>
+                    </Link>
                 </div>
-              )}
-            </div>
-          ))}
+
+                {activeMenu === rutina._id && (
+                    <div className="absolute top-12 right-4 w-40 bg-[#1a1a1a] border border-gray-700 rounded-xl shadow-2xl z-10 overflow-hidden flex flex-col animate-in fade-in zoom-in-95 duration-100">
+                    {/* 3. BOTÓN EDITAR CONECTADO */}
+                    <button 
+                        className="flex items-center gap-3 px-4 py-3 text-sm text-gray-300 hover:bg-gray-800 hover:text-white text-left transition-colors"
+                        onClick={() => navigate(`/routines/edit/${rutina._id}`)} // <--- Navegación al editor
+                    >
+                        <Edit2 size={16} className="text-blue-500"/> Editar
+                    </button>
+                    
+                    <div className="h-[1px] bg-gray-800"></div>
+
+                    <button 
+                        onClick={() => confirmDelete(rutina._id)}
+                        className="flex items-center gap-3 px-4 py-3 text-sm text-red-400 hover:bg-red-900/20 hover:text-red-300 text-left transition-colors"
+                    >
+                        <Trash2 size={16} /> Eliminar
+                    </button>
+                    </div>
+                )}
+                </div>
+            ))
+        )}
       </div>
 
-      {/* Componente Modal Renderizado aquí */}
       <ConfirmModal 
         isOpen={showModal}
         onClose={() => setShowModal(false)}
         onConfirm={handleDelete}
         title="Eliminar Rutina"
         message="¿Estás seguro de que quieres eliminar esta rutina? Esta acción no se puede deshacer."
-        isDeleting={true}
+        type="danger" // <--- 4. Actualizado para coincidir con el nuevo ConfirmModal
       />
     </div>
   )
