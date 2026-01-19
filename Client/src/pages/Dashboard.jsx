@@ -3,12 +3,30 @@ import { Users, Dumbbell, TrendingUp, Plus, Calendar, ClipboardList, Loader2 } f
 import { Link } from 'react-router-dom'
 import Card from '../components/ui/Card'
 
+// 1. IMPORTAMOS EL STORE DE AUTENTICACIÓN Y LA VISTA DE CLIENTE
+import { useAuthStore } from "../store/useAuthStore";
+import UserDashboard from './UserDashboard'
+
 const Dashboard = () => {
+  // 2. OBTENEMOS EL USUARIO ACTUAL
+  const { user } = useAuthStore()
+  
   const [metrics, setMetrics] = useState({ users: 0, routines: 0, exercises: 0 })
   const [loading, setLoading] = useState(true)
 
+  // 3. LÓGICA DE SEMÁFORO: Si es cliente, devolvemos su vista inmediatamente
+  // Esto evita que se ejecute el resto del código de Admin
+  if (user && !user.isAdmin) {
+    return <UserDashboard />
+  }
+
+  // --- A PARTIR DE AQUÍ, SOLO SE EJECUTA SI ERES ADMIN ---
+
   useEffect(() => {
     const loadDashboardData = async () => {
+      // Protección extra: Si no hay user o no es admin, no hacemos fetch
+      if (!user?.isAdmin) return; 
+
       try {
         const [resUsers, resRoutines, resExercises] = await Promise.all([
           fetch('http://localhost:3000/api/users'),
@@ -31,7 +49,7 @@ const Dashboard = () => {
       }
     }
     loadDashboardData()
-  }, [])
+  }, [user]) // Agregamos user como dependencia
 
   const stats = [
     { label: 'Clientes Registrados', value: metrics.users, icon: Users, color: 'text-blue-500', trend: 'Total histórico' },
@@ -45,7 +63,7 @@ const Dashboard = () => {
     { id: 3, text: "Nueva rutina creada para Carlos Ruiz", time: "Hace 5 horas", type: "neutral" },
   ]
 
-  if (loading) {
+  if (loading && user?.isAdmin) {
     return (
       <div className="flex h-[80vh] items-center justify-center text-white">
         <Loader2 className="animate-spin mr-2" size={40} />
@@ -60,7 +78,8 @@ const Dashboard = () => {
       {/* Encabezado */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-white">Hola, Lautaro 👋</h1>
+          {/* 4. SALUDO DINÁMICO */}
+          <h1 className="text-3xl font-bold text-white">Hola, {user?.nombre || 'Admin'} 👋</h1>
           <p className="text-gray-400 mt-1">Aquí tienes el resumen de tu día.</p>
         </div>
         <div className="bg-gray-900 border border-gray-800 px-4 py-2 rounded-lg">
@@ -124,7 +143,7 @@ const Dashboard = () => {
 
           </div>
 
-          {/* Banner de Agenda (SIN BOTÓN) */}
+          {/* Banner de Agenda */}
           <div className="p-6 bg-gradient-to-r from-gray-900 to-gray-800 border border-gray-700/50 rounded-2xl flex items-center gap-4">
               <div className="p-3 bg-gray-800 rounded-full text-gray-300 border border-gray-700">
                 <Calendar size={24} />
@@ -136,7 +155,7 @@ const Dashboard = () => {
           </div>
         </div>
 
-        {/* Actividad Reciente (SIN BOTÓN) */}
+        {/* Actividad Reciente */}
         <div className="lg:col-span-1">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-xl font-bold text-white">Actividad Reciente</h2>
