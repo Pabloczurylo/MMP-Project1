@@ -1,25 +1,24 @@
 import { useEffect, useState } from 'react'
 import { useAuthStore } from '../store/useAuthStore'
-import { Calendar, Dumbbell, TrendingUp } from 'lucide-react'
+import { Calendar, Dumbbell, TrendingUp, ArrowRight } from 'lucide-react'
+import { useNavigate } from 'react-router-dom' // <--- IMPORTANTE: Necesario para navegar
 
 const UserDashboard = () => {
   const { user } = useAuthStore()
   const [myRoutine, setMyRoutine] = useState(null)
   const [loading, setLoading] = useState(true)
+  const navigate = useNavigate() // <--- IMPORTANTE: Inicializamos la navegación
 
   useEffect(() => {
     const fetchMyRoutine = async () => {
       if (!user?._id) return
 
       try {
-        // Nota: Idealmente el backend debería tener un endpoint /api/rutinas?userId=...
-        // Por ahora traemos todas y filtramos en el cliente (funciona bien para empezar)
         const res = await fetch('http://localhost:3000/api/rutinas')
         const data = await res.json()
 
         if (Array.isArray(data)) {
-          // Buscamos la rutina que pertenezca a este usuario (la más reciente si hay varias)
-          // Asumimos que la última creada es la vigente, o buscamos por ID directo
+          // Buscamos la rutina de este usuario
           const found = data.filter(r => r.usuarioId === user._id).pop() 
           setMyRoutine(found)
         }
@@ -37,7 +36,7 @@ const UserDashboard = () => {
     <div className="text-white p-4 md:p-8 animate-in fade-in duration-500">
       <div className="max-w-4xl mx-auto">
         
-        {/* Encabezado de Bienvenida */}
+        {/* Encabezado */}
         <div className="bg-gradient-to-r from-gray-900 to-[#111111] rounded-2xl p-8 border border-gray-800 mb-8 flex justify-between items-center">
           <div>
              <h1 className="text-3xl font-bold mb-2">Hola, {user?.nombre} 👋</h1>
@@ -45,10 +44,9 @@ const UserDashboard = () => {
           </div>
         </div>
 
-        {/* Sección Principal */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           
-          {/* Tarjeta: Mi Plan Actual */}
+          {/* --- TARJETA PRINCIPAL (Aquí está el cambio) --- */}
           <div className="bg-[#111111] p-6 rounded-2xl border border-gray-800 flex flex-col justify-between min-h-[200px]">
             <div>
                 <div className="flex items-center gap-2 mb-4">
@@ -59,23 +57,26 @@ const UserDashboard = () => {
                 {loading ? (
                     <p className="text-gray-500 animate-pulse">Buscando tu plan...</p>
                 ) : myRoutine ? (
-                    <div className="space-y-4">
-                        <div className="p-4 bg-gray-900/50 rounded-xl border border-gray-800">
-                           <p className="text-blue-400 text-xs font-bold uppercase tracking-wider mb-1">Nombre de la Rutina</p>
-                           <p className="text-2xl font-bold text-white">{myRoutine.nombre}</p>
+                    <div className="p-5 bg-gray-900/50 rounded-xl border border-gray-800 hover:border-gray-700 transition-colors">
+                        <div className="flex justify-between items-start mb-2">
+                            <div>
+                                <p className="text-blue-400 text-xs font-bold uppercase tracking-wider mb-1">Rutina Asignada</p>
+                                <p className="text-xl font-bold text-white capitalize leading-tight mb-1">{myRoutine.nombre}</p>
+                            </div>
                         </div>
                         
                         {myRoutine.descripcion && (
-                             <div className="p-3 bg-gray-900/30 rounded-lg">
-                                <p className="text-gray-400 text-sm italic">"{myRoutine.descripcion}"</p>
-                             </div>
+                                <p className="text-gray-400 text-sm mb-4 line-clamp-2 italic">"{myRoutine.descripcion}"</p>
                         )}
                         
-                        <div className="flex items-center gap-2 text-sm text-gray-500 mt-2">
-                            <span className="bg-blue-500/10 text-blue-400 px-2 py-1 rounded text-xs">
-                                {myRoutine.ejerciciosIDs?.length || 0} Ejercicios
-                            </span>
-                        </div>
+                        {/* --- EL BOTÓN QUE FALTABA 👇 --- */}
+                        <button 
+                            onClick={() => navigate('/rutina', { state: { routine: myRoutine } })}
+                            className="w-full bg-blue-600 hover:bg-blue-500 active:bg-blue-700 text-white font-semibold py-2.5 rounded-lg transition-all flex items-center justify-center gap-2 group shadow-lg shadow-blue-900/20"
+                        >
+                            <span>Ver Ejercicios</span>
+                            <ArrowRight className="group-hover:translate-x-1 transition-transform" size={18} />
+                        </button>
                     </div>
                 ) : (
                     <div className="p-4 bg-yellow-900/10 border border-yellow-500/20 rounded-xl text-center">
@@ -86,7 +87,7 @@ const UserDashboard = () => {
             </div>
           </div>
 
-          {/* Tarjeta: Próxima Sesión (Placeholder visual) */}
+          {/* Tarjeta Secundaria (Placeholder) */}
           <div className="bg-[#111111] p-6 rounded-2xl border border-gray-800 relative overflow-hidden group">
             <div className="absolute top-0 right-0 p-32 bg-purple-600/5 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none"></div>
             

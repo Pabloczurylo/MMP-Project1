@@ -10,6 +10,7 @@ import ExercisesList from './pages/ExercisesList'
 import ExerciseForm from './pages/ExerciseForm'
 import Login from './pages/Login'
 import ProtectedRoute from './components/ProtectedRoute' 
+import ClientRoutineDetail from './pages/ClientRoutineDetail';
 // import { Outlet } from 'react-router-dom' <--- YA NO ES NECESARIO (lo usa MainLayout)
 
 // IMPORTAMOS TU LAYOUT EXTERNO (El que tiene el botón hamburguesa y la lógica)
@@ -38,6 +39,7 @@ function App() {
           <Route path="/routines/new" element={<CreateRoutine />} />
           <Route path="/routines/edit/:id" element={<CreateRoutine />} />
           <Route path="/routines/:id" element={<RoutineDetail />} />
+          <Route path="/rutina" element={<ClientRoutineDetail />} />
 
           {/* Ejercicios */}
           <Route path="/exercises" element={<ExercisesList />} />
