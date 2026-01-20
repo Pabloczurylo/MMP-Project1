@@ -1,11 +1,11 @@
 import { useEffect, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
-import { ArrowLeft, Dumbbell, Clock, Calendar, Target, AlertCircle, Loader2 } from 'lucide-react'
+import { ArrowLeft, Dumbbell, Clock, Target, AlertCircle, Loader2 } from 'lucide-react'
 
 const ClientRoutineDetail = () => {
   const location = useLocation()
   const navigate = useNavigate()
-  // Recibimos la rutina directamente desde el Dashboard (sin fetch extra)
+  // Recibimos la rutina directamente desde el Dashboard
   const { routine } = location.state || {} 
   
   const [exercises, setExercises] = useState([])
@@ -22,7 +22,6 @@ const ClientRoutineDetail = () => {
   useEffect(() => {
     const fetchExercises = async () => {
       try {
-        // Traemos los ejercicios para buscar los detalles (nombres, gifs, instrucciones)
         const res = await fetch('http://localhost:3000/api/ejercicios')
         const data = await res.json()
         
@@ -94,7 +93,12 @@ const ClientRoutineDetail = () => {
             </div>
         ) : exercises.length > 0 ? (
             exercises.map((exercise, index) => (
-                <div key={exercise._id} className="bg-[#111111] border border-gray-800 rounded-xl overflow-hidden flex flex-col md:flex-row group transition-all hover:border-gray-600">
+                <div 
+                    key={exercise._id} 
+                    // Al hacer click, navegamos al detalle pasando el ejercicio
+                    onClick={() => navigate('/ejercicio', { state: { exercise } })}
+                    className="bg-[#111111] border border-gray-800 rounded-xl overflow-hidden flex flex-col md:flex-row group transition-all hover:border-gray-600 cursor-pointer active:scale-[0.99]"
+                >
                     
                     {/* Imagen / GIF */}
                     <div className="w-full md:w-32 h-48 md:h-auto bg-gray-900 relative shrink-0">
@@ -120,7 +124,6 @@ const ClientRoutineDetail = () => {
                         <div className="mb-3">
                             <h4 className="font-bold text-lg capitalize text-white mb-1">{exercise.nombre}</h4>
                             <p className="text-sm text-gray-400 leading-relaxed line-clamp-2">
-                                {/* Aquí mostramos instrucciones o músculo si no hay instrucciones */}
                                 {exercise.musculo ? `Enfoque en: ${exercise.musculo}` : "Sigue la técnica correcta."}
                             </p>
                         </div>
