@@ -1,5 +1,5 @@
 import { Routes, Route, Navigate } from 'react-router-dom'
-import Sidebar from './components/layout/Sidebar'
+// import Sidebar from './components/layout/Sidebar' 
 import Dashboard from './pages/Dashboard'
 import Clients from './pages/Clients'
 import ClientForm from './pages/ClientForm'
@@ -10,30 +10,23 @@ import ExercisesList from './pages/ExercisesList'
 import ExerciseForm from './pages/ExerciseForm'
 import Login from './pages/Login'
 import ProtectedRoute from './components/ProtectedRoute' 
-import { Outlet } from 'react-router-dom'
+import ClientRoutineDetail from './pages/ClientRoutineDetail';
+import ClientExerciseDetail from './pages/ClientExerciseDetail';
+// import { Outlet } from 'react-router-dom' <--- YA NO ES NECESARIO (lo usa MainLayout)
 
-// Layout principal para las páginas protegidas (Con Sidebar)
-const MainLayout = () => {
-  return (
-    <div className="flex min-h-screen bg-[#000000]">
-      <Sidebar />
-      <div className="flex-1 ml-0 md:ml-64 p-8 overflow-y-auto h-screen">
-        <Outlet />
-      </div>
-    </div>
-  )
-}
+// IMPORTAMOS TU LAYOUT EXTERNO (El que tiene el botón hamburguesa y la lógica)
+import MainLayout from './components/layout/MainLayout'; 
 
 function App() {
   return (
     <Routes>
-      {/* 1. Ruta Pública: LOGIN (Sin Sidebar, pantalla completa) */}
+      {/* 1. Ruta Pública: LOGIN */}
       <Route path="/login" element={<Login />} />
 
-      {/* 2. Rutas Protegidas (Solo accesibles con Token) */}
+      {/* 2. Rutas Protegidas */}
       <Route element={<ProtectedRoute />}>
         
-        {/* Usamos el MainLayout para agregar la Sidebar a todas estas rutas */}
+        {/* Usamos el MainLayout importado que maneja el menú responsive */}
         <Route element={<MainLayout />}>
           <Route path="/" element={<Dashboard />} />
           
@@ -47,6 +40,8 @@ function App() {
           <Route path="/routines/new" element={<CreateRoutine />} />
           <Route path="/routines/edit/:id" element={<CreateRoutine />} />
           <Route path="/routines/:id" element={<RoutineDetail />} />
+          <Route path="/rutina" element={<ClientRoutineDetail />} />
+          <Route path="/ejercicio" element={<ClientExerciseDetail />} />
 
           {/* Ejercicios */}
           <Route path="/exercises" element={<ExercisesList />} />
@@ -56,7 +51,7 @@ function App() {
 
       </Route>
 
-      {/* Redirección por defecto: Si ponen una ruta loca, mandar al Login o al Dashboard */}
+      {/* Redirección por defecto */}
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   )

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
-import { User, Mail, Phone, Target, FileText, Save, X } from 'lucide-react'
+import { User, Mail, Phone, Target, FileText, Save, X, Lock, Eye, EyeOff } from 'lucide-react'
 import { Link, useNavigate, useLocation } from 'react-router-dom'
 
 const ClientForm = () => {
@@ -8,28 +8,25 @@ const ClientForm = () => {
   const navigate = useNavigate()
   const location = useLocation()
   
-  // URL base de tu servidor
+  // Estado para controlar la visibilidad de la contraseña
+  const [showPassword, setShowPassword] = useState(false)
+
   const API_URL = 'http://localhost:3000/api/users'
   
   const queryParams = new URLSearchParams(location.search)
   const clientId = queryParams.get('id')
   const isEditing = Boolean(clientId)
 
-  // 1. Cargar datos del cliente desde el Back-End si estamos editando
   useEffect(() => {
     if (!isEditing) return
 
     const fetchClientData = async () => {
       try {
-        
         const response = await fetch(`${API_URL}/`) 
         const clients = await response.json()
-        
-        // Buscamos por _id (Mongo) o id (Front)
         const client = clients.find(c => String(c._id || c.id) === String(clientId))
 
         if (client) {
-          // Mapeo inverso de planes para el formulario
           const reversePlan = {
             'Pérdida de Peso': 'perdida_peso',
             'Hipertrofia': 'hipertrofia',
@@ -39,7 +36,7 @@ const ClientForm = () => {
           }
 
           reset({
-            fullName: client.nombre, 
+            fullName: client.nombre,
             email: client.email || '',
             phone: client.phone || '',
             age: client.age || '',
@@ -55,7 +52,6 @@ const ClientForm = () => {
     fetchClientData()
   }, [clientId, isEditing, reset])
 
-  // 2. Enviar datos al Back-End (Crear o Editar)
   const onSubmit = async (data) => {
     const planMap = {
       perdida_peso: 'Pérdida de Peso',
@@ -66,9 +62,8 @@ const ClientForm = () => {
     }
 
     const clientPayload = {
-      nombre: data.fullName, 
+      nombre: data.fullName,
       email: data.email,
-      password: '123456',    
       phone: data.phone,
       age: data.age,
       plan: planMap[data.goal],
@@ -76,19 +71,23 @@ const ClientForm = () => {
       status: 'Activo'
     }
 
+    // Validar si enviamos contraseña
+    if (data.password) {
+        clientPayload.password = data.password;
+    } else if (!isEditing) {
+        alert("La contraseña es obligatoria para nuevos clientes");
+        return;
+    }
+
     try {
       let response
       if (isEditing) {
-        // 3. Actualización (PUT)
         response = await fetch(`${API_URL}/${clientId}`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(clientPayload)
         })
       } else {
-        // 4. Registro Nuevo (POST)
-        
-        // Si tu backend usa /register para crear, déjalo así. Si usa la raíz /, quita "register".
         response = await fetch(`${API_URL}/register`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -97,11 +96,10 @@ const ClientForm = () => {
       }
 
       if (response.ok) {
-        alert(isEditing ? 'Cliente actualizado en MongoDB' : 'Cliente registrado en MongoDB')
+        alert(isEditing ? 'Cliente actualizado exitosamente' : 'Cliente registrado exitosamente')
         navigate('/clients')
       } else {
         const err = await response.json()
-        
         alert(`Error: ${err.message || err.error || 'No se pudo guardar'}`)
       }
     } catch (error) {
@@ -115,7 +113,9 @@ const ClientForm = () => {
       <div className="flex items-center justify-between mb-8">
         <div>
           <h1 className="text-3xl font-bold text-white">{isEditing ? 'Editar Cliente' : 'Nuevo Cliente'}</h1>
-          <p className="text-gray-400 mt-1">Conectado a la base de datos real.</p>
+          <p className="text-gray-400 mt-1">
+            {isEditing ? 'Modificar datos o cambiar contraseña.' : 'Registrar un nuevo usuario en el sistema.'}
+          </p>
         </div>
         <Link to="/clients" className="p-2 text-gray-400 hover:text-white hover:bg-gray-800 rounded-lg">
           <X size={24} />
@@ -126,7 +126,7 @@ const ClientForm = () => {
         <div className="bg-[#111111] p-6 rounded-2xl border border-gray-800/50">
           <h2 className="text-xl font-bold text-white mb-6 flex items-center gap-2">
             <User className="text-blue-500" size={20} />
-            Información Personal
+            Información de Cuenta
           </h2>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -142,7 +142,7 @@ const ClientForm = () => {
             </div>
 
             <div className="space-y-2">
-              <label className="text-sm font-medium text-gray-300">Email</label>
+              <label className="text-sm font-medium text-gray-300">Email (Usuario)</label>
               <div className="relative">
                 <input
                   {...register("email", { required: "Email obligatorio" })}
@@ -153,6 +153,38 @@ const ClientForm = () => {
                 <Mail className="absolute left-3 top-3.5 text-gray-500" size={18} />
               </div>
             </div>
+
+            {/* --- SECCIÓN CONTRASEÑA ACTUALIZADA --- */}
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-gray-300">
+                {isEditing ? 'Nueva Contraseña (Opcional)' : 'Asignar Contraseña'}
+              </label>
+              <div className="relative">
+                <input
+                  {...register("password", { 
+                    required: !isEditing ? "La contraseña es obligatoria para nuevos usuarios" : false,
+                    
+                    minLength: { value: 8, message: "La contraseña debe tener al menos 8 caracteres" }
+                  })}
+                  type={showPassword ? "text" : "password"}
+                  className="w-full bg-[#1a1a1a] border border-gray-800 rounded-xl p-3 pl-10 pr-10 text-white outline-none focus:border-blue-500"
+
+                  placeholder={isEditing ? "Dejar vacío para mantener la actual" : "Mínimo 8 caracteres"}
+                />
+                
+                <Lock className="absolute left-3 top-3.5 text-gray-500" size={18} />
+
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-3.5 text-gray-500 hover:text-white transition-colors focus:outline-none"
+                >
+                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
+              </div>
+              {errors.password && <span className="text-red-500 text-xs">{errors.password.message}</span>}
+            </div>
+            {/* -------------------------------------- */}
 
             <div className="space-y-2">
               <label className="text-sm font-medium text-gray-300">Teléfono</label>
