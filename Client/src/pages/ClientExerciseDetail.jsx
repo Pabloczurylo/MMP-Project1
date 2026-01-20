@@ -5,8 +5,35 @@ import { ArrowLeft, Dumbbell, Clock, Zap, HelpCircle } from 'lucide-react'
 const ClientExerciseDetail = () => {
   const location = useLocation()
   const navigate = useNavigate()
-  // Recibimos el objeto ejercicio completo
   const { exercise } = location.state || {}
+
+  // --- FUNCIÓN PARA CONVERTIR LINKS DE YOUTUBE ---
+  const getEmbedUrl = (url) => {
+    if (!url) return null;
+
+    let videoId = null;
+
+    // Caso 1: Es un YouTube Short 
+    if (url.includes("shorts/")) {
+        videoId = url.split("shorts/")[1].split("?")[0];
+    } 
+    // Caso 2: Es un link normal de YouTube (watch?v=...)
+    else if (url.includes("v=")) {
+        videoId = url.split("v=")[1].split("&")[0];
+    }
+    // Caso 3: Es un link corto (youtu.be/...)
+    else if (url.includes("youtu.be/")) {
+        videoId = url.split("youtu.be/")[1].split("?")[0];
+    }
+
+    // Si encontramos un ID, devolvemos la URL embed con Autoplay, Mute y Loop
+    if (videoId) {
+        return `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&loop=1&playlist=${videoId}&controls=0&showinfo=0`;
+    }
+
+    // Si no es YouTube, devolvemos la url original (por si acaso fuera un mp4 directo)
+    return url;
+  };
 
   useEffect(() => {
     if (!exercise) {
@@ -16,11 +43,15 @@ const ClientExerciseDetail = () => {
 
   if (!exercise) return null
 
+  // Procesamos la URL aquí
+  const videoSrc = getEmbedUrl(exercise.videoUrl || exercise.gifUrl);
+  const isYouTube = exercise.videoUrl && (exercise.videoUrl.includes("youtube") || exercise.videoUrl.includes("youtu.be"));
+
   return (
     <div className="min-h-screen bg-black text-white pb-10 animate-in slide-in-from-right duration-300">
       
-      {/* 1. Header con Imagen Gigante (Hero) */}
-      <div className="relative w-full h-[45vh] bg-gray-900">
+      {/* 1. Header con Video (Hero) */}
+      <div className="relative w-full h-[50vh] bg-gray-900 overflow-hidden">
         
         {/* Botón Volver Flotante */}
         <button 
@@ -30,32 +61,46 @@ const ClientExerciseDetail = () => {
           <ArrowLeft size={24} />
         </button>
 
-        {exercise.gifUrl ? (
-          <img 
-            src={exercise.gifUrl} 
-            alt={exercise.name} 
-            className="w-full h-full object-cover opacity-90"
-          />
+        {videoSrc ? (
+            isYouTube ? (
+                <iframe 
+                    src={videoSrc} 
+                    title={exercise.nombre}
+                    className="w-full h-full object-cover"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowFullScreen
+                    style={{ pointerEvents: 'none' }} // Evita que el usuario toque pausa/play, solo visual
+                ></iframe>
+            ) : (
+                <img 
+                    src={videoSrc} 
+                    alt={exercise.nombre} 
+                    className="w-full h-full object-cover opacity-90"
+                />
+            )
         ) : (
-          <div className="w-full h-full flex items-center justify-center text-gray-700">
-            <Dumbbell size={64} />
+          <div className="w-full h-full flex items-center justify-center text-gray-700 bg-gray-900">
+            <div className="text-center">
+                <Dumbbell size={64} className="mx-auto mb-2 opacity-50" />
+                <p className="text-sm">Sin video disponible</p>
+            </div>
           </div>
         )}
         
-        {/* Degradado para que el texto se lea bien */}
-        <div className="absolute bottom-0 w-full h-32 bg-gradient-to-t from-black to-transparent"></div>
+        {/* Degradado inferior para que el texto se lea bien */}
+        <div className="absolute bottom-0 w-full h-32 bg-gradient-to-t from-black to-transparent pointer-events-none"></div>
       </div>
 
       <div className="px-5 -mt-8 relative z-10">
         {/* 2. Título y Tags */}
-        <h1 className="text-3xl font-bold capitalize mb-2 leading-tight">{exercise.name}</h1>
+        <h1 className="text-3xl font-bold capitalize mb-2 leading-tight">{exercise.nombre}</h1>
         
         <div className="flex flex-wrap gap-2 mb-6">
           <span className="bg-blue-600 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider">
-            {exercise.bodyPart}
+            {exercise.musculo || "General"}
           </span>
           <span className="bg-purple-600/20 text-purple-300 border border-purple-500/30 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider">
-            {exercise.target}
+            Ejecución Técnica
           </span>
         </div>
 
@@ -85,7 +130,8 @@ const ClientExerciseDetail = () => {
                 Instrucciones
             </h3>
             <div className="bg-[#111111] border border-gray-800 rounded-2xl p-5 space-y-4">
-                {exercise.instructions && exercise.instructions.length > 0 ? (
+                 {/* Si instructions es un array lo mapeamos, si es string lo mostramos, si no hay nada, default */}
+                {Array.isArray(exercise.instructions) && exercise.instructions.length > 0 ? (
                     exercise.instructions.map((step, idx) => (
                         <div key={idx} className="flex gap-4">
                             <span className="flex-shrink-0 w-6 h-6 rounded-full bg-blue-900/30 text-blue-400 flex items-center justify-center text-xs font-bold border border-blue-500/20">
@@ -95,15 +141,19 @@ const ClientExerciseDetail = () => {
                         </div>
                     ))
                 ) : (
-                    <p className="text-gray-500 italic">Sigue las indicaciones de tu entrenador personal.</p>
+                    <p className="text-gray-400 italic text-sm">
+                        {typeof exercise.instructions === 'string' 
+                            ? exercise.instructions 
+                            : "Sigue las indicaciones de tu entrenador personal para este ejercicio."}
+                    </p>
                 )}
             </div>
         </div>
 
-        {/* 5. Botón de "Completado" (Visual por ahora) */}
+        {/* 5. Botón de "Completado" */}
         <button 
             onClick={() => navigate(-1)}
-            className="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-4 rounded-xl text-lg shadow-lg shadow-blue-900/20 active:scale-95 transition-all"
+            className="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-4 rounded-xl text-lg shadow-lg shadow-blue-900/20 active:scale-95 transition-all mb-4"
         >
             ¡Entendido, a darle! 🔥
         </button>
