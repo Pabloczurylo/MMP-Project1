@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Search, Plus, Dumbbell, MoreHorizontal, Edit2, Trash2, RefreshCw, Loader2 } from 'lucide-react'
-import { Link, useNavigate } from 'react-router-dom' // <--- Importamos useNavigate
+import { Link, useNavigate } from 'react-router-dom' 
 import ConfirmModal from '../components/ConfirmModal'
 
 const ExercisesList = () => {
@@ -87,7 +87,6 @@ const ExercisesList = () => {
       <div className="flex justify-between items-center gap-4">
         <div>
           <h1 className="text-2xl md:text-3xl font-bold">Banco de Ejercicios</h1>
-          <p className="text-gray-400 text-sm md:text-base">Datos en tiempo real del servidor.</p>
         </div>
         <Link 
           to="/exercises/new" 

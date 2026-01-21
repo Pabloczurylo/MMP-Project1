@@ -1,13 +1,13 @@
 import { useEffect, useState } from 'react'
 import { useAuthStore } from '../store/useAuthStore'
 import { Calendar, Dumbbell, TrendingUp, ArrowRight } from 'lucide-react'
-import { useNavigate } from 'react-router-dom' // <--- IMPORTANTE: Necesario para navegar
+import { useNavigate } from 'react-router-dom'
 
 const UserDashboard = () => {
   const { user } = useAuthStore()
   const [myRoutine, setMyRoutine] = useState(null)
   const [loading, setLoading] = useState(true)
-  const navigate = useNavigate() // <--- IMPORTANTE: Inicializamos la navegación
+  const navigate = useNavigate()
 
   useEffect(() => {
     const fetchMyRoutine = async () => {
@@ -46,7 +46,7 @@ const UserDashboard = () => {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           
-          {/* --- TARJETA PRINCIPAL (Aquí está el cambio) --- */}
+          {/* --- TARJETA PRINCIPAL: MI PLAN ACTUAL --- */}
           <div className="bg-[#111111] p-6 rounded-2xl border border-gray-800 flex flex-col justify-between min-h-[200px]">
             <div>
                 <div className="flex items-center gap-2 mb-4">
@@ -69,7 +69,6 @@ const UserDashboard = () => {
                                 <p className="text-gray-400 text-sm mb-4 line-clamp-2 italic">"{myRoutine.descripcion}"</p>
                         )}
                         
-                        {/* --- EL BOTÓN QUE FALTABA 👇 --- */}
                         <button 
                             onClick={() => navigate('/rutina', { state: { routine: myRoutine } })}
                             className="w-full bg-blue-600 hover:bg-blue-500 active:bg-blue-700 text-white font-semibold py-2.5 rounded-lg transition-all flex items-center justify-center gap-2 group shadow-lg shadow-blue-900/20"
@@ -87,29 +86,54 @@ const UserDashboard = () => {
             </div>
           </div>
 
-          {/* Tarjeta Secundaria (Placeholder) */}
-          <div className="bg-[#111111] p-6 rounded-2xl border border-gray-800 relative overflow-hidden group">
+          {/* --- TARJETA SECUNDARIA: ACCESO RÁPIDO (ACTUALIZADA) --- */}
+          <div className="bg-[#111111] p-6 rounded-2xl border border-gray-800 relative overflow-hidden flex flex-col justify-between">
+            {/* Decoración de fondo */}
             <div className="absolute top-0 right-0 p-32 bg-purple-600/5 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none"></div>
             
-            <div className="flex items-center gap-2 mb-4 relative z-10">
-                <Calendar className="text-purple-500" size={24} />
-                <h2 className="text-xl font-bold text-white">Próximo Entrenamiento</h2>
+            <div>
+                <div className="flex items-center gap-2 mb-4 relative z-10">
+                    <Calendar className="text-purple-500" size={24} />
+                    <h2 className="text-xl font-bold text-white">Próximo Entrenamiento</h2>
+                </div>
+
+                <div className="p-4 bg-gray-900/50 rounded-xl border border-gray-800 relative z-10 mb-4">
+                    <p className="text-purple-400 text-xs font-bold uppercase tracking-wider mb-1">Sugerencia</p>
+                    <p className="text-lg font-medium text-white">
+                        {myRoutine ? "¡Es un buen momento para entrenar!" : "Descanso"}
+                    </p>
+                    <p className="text-sm text-gray-500 mt-1">
+                        {myRoutine ? "Tu cuerpo puede con todo." : "Espera a tener un plan asignado."}
+                    </p>
+                </div>
             </div>
 
-            <div className="p-4 bg-gray-900/50 rounded-xl border border-gray-800 relative z-10">
-                <p className="text-purple-400 text-xs font-bold uppercase tracking-wider mb-1">Sugerencia</p>
-                <p className="text-lg font-medium text-white">Continuar con tu rutina</p>
-                <p className="text-sm text-gray-500 mt-2">Recuerda registrar tus pesos.</p>
-            </div>
-
-            <div className="mt-6 p-4 rounded-xl bg-gray-900/30 border border-gray-800 relative z-10">
+            <div className="relative z-10 mt-auto">
+                 {/* Barra de progreso visual */}
                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-sm text-gray-400">Progreso Semanal</span>
-                    <span className="text-sm text-white font-bold">0%</span>
+                    <span className="text-sm text-gray-400">Estado Semanal</span>
+                    <span className="text-sm text-white font-bold">Listo</span>
                  </div>
-                 <div className="w-full bg-gray-800 h-2 rounded-full overflow-hidden">
-                    <div className="bg-purple-600 h-full w-[2%]"></div>
+                 <div className="w-full bg-gray-800 h-2 rounded-full overflow-hidden mb-5">
+                    <div className="bg-purple-600 h-full w-[15%]"></div>
                  </div>
+
+                 {/* BOTÓN "COMENZAR AHORA" */}
+                 <button 
+                    onClick={() => myRoutine && navigate('/rutina', { state: { routine: myRoutine } })}
+                    disabled={!myRoutine}
+                    className={`w-full py-3 rounded-xl font-bold flex items-center justify-center gap-2 transition-all ${
+                        myRoutine 
+                        ? 'bg-purple-600 hover:bg-purple-700 text-white shadow-lg shadow-purple-900/20 active:scale-[0.98]' 
+                        : 'bg-gray-800 text-gray-500 cursor-not-allowed'
+                    }`}
+                 >
+                    {myRoutine ? (
+                        <>Comenzar Ahora <TrendingUp size={20} /></>
+                    ) : (
+                        "Sin rutina"
+                    )}
+                 </button>
             </div>
           </div>
 
