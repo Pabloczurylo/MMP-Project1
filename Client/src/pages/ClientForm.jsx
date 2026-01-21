@@ -2,14 +2,23 @@ import { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { User, Mail, Phone, Target, FileText, Save, X, Lock, Eye, EyeOff } from 'lucide-react'
 import { Link, useNavigate, useLocation } from 'react-router-dom'
+import ConfirmModal from '../components/ConfirmModal' // <--- 1. Importar Modal
 
 const ClientForm = () => {
   const { register, handleSubmit, formState: { errors }, reset } = useForm()
   const navigate = useNavigate()
   const location = useLocation()
   
-  // Estado para controlar la visibilidad de la contraseña
   const [showPassword, setShowPassword] = useState(false)
+  
+  // --- 2. Estado para manejar el Modal ---
+  const [modalConfig, setModalConfig] = useState({
+    isOpen: false,
+    title: '',
+    message: '',
+    type: 'success', // 'success' | 'danger'
+    onConfirm: null // La función a ejecutar al darle al botón azul
+  })
 
   const API_URL = 'http://localhost:3000/api/users'
   
@@ -71,11 +80,17 @@ const ClientForm = () => {
       status: 'Activo'
     }
 
-    // Validar si enviamos contraseña
     if (data.password) {
         clientPayload.password = data.password;
     } else if (!isEditing) {
-        alert("La contraseña es obligatoria para nuevos clientes");
+        // Error de validación local (Usamos el modal en modo error)
+        setModalConfig({
+            isOpen: true,
+            type: 'danger',
+            title: 'Faltan datos',
+            message: 'La contraseña es obligatoria para nuevos clientes',
+            onConfirm: () => {} // No hace nada, solo cierra
+        });
         return;
     }
 
@@ -96,20 +111,53 @@ const ClientForm = () => {
       }
 
       if (response.ok) {
-        alert(isEditing ? 'Cliente actualizado exitosamente' : 'Cliente registrado exitosamente')
-        navigate('/clients')
+        // --- 3. ÉXITO: Mostrar Modal Verde y redirigir al confirmar ---
+        setModalConfig({
+            isOpen: true,
+            type: 'success',
+            title: isEditing ? '¡Actualización Exitosa!' : '¡Registro Exitoso!',
+            message: isEditing 
+                ? 'Los datos del cliente han sido actualizados correctamente.' 
+                : 'El cliente ha sido registrado en el sistema correctamente.',
+            onConfirm: () => navigate('/clients') // <--- Aquí redirigimos
+        });
+
       } else {
+        // --- ERROR DE API: Mostrar Modal Rojo ---
         const err = await response.json()
-        alert(`Error: ${err.message || err.error || 'No se pudo guardar'}`)
+        setModalConfig({
+            isOpen: true,
+            type: 'danger',
+            title: 'Error al guardar',
+            message: err.message || err.error || 'No se pudo procesar la solicitud.',
+            onConfirm: () => {}
+        });
       }
     } catch (error) {
       console.error(error)
-      alert("Error crítico de conexión con el servidor")
+      // --- ERROR DE RED ---
+      setModalConfig({
+        isOpen: true,
+        type: 'danger',
+        title: 'Error de Conexión',
+        message: 'No se pudo conectar con el servidor. Intenta nuevamente.',
+        onConfirm: () => {}
+      });
     }
   }
 
   return (
     <div className="max-w-4xl mx-auto">
+      {/* --- 4. Renderizar el Modal --- */}
+      <ConfirmModal 
+        isOpen={modalConfig.isOpen}
+        title={modalConfig.title}
+        message={modalConfig.message}
+        type={modalConfig.type}
+        onConfirm={modalConfig.onConfirm}
+        onClose={() => setModalConfig({ ...modalConfig, isOpen: false })}
+      />
+
       <div className="flex items-center justify-between mb-8">
         <div>
           <h1 className="text-3xl font-bold text-white">{isEditing ? 'Editar Cliente' : 'Nuevo Cliente'}</h1>
@@ -154,7 +202,6 @@ const ClientForm = () => {
               </div>
             </div>
 
-            {/* --- SECCIÓN CONTRASEÑA ACTUALIZADA --- */}
             <div className="space-y-2">
               <label className="text-sm font-medium text-gray-300">
                 {isEditing ? 'Nueva Contraseña (Opcional)' : 'Asignar Contraseña'}
@@ -163,17 +210,13 @@ const ClientForm = () => {
                 <input
                   {...register("password", { 
                     required: !isEditing ? "La contraseña es obligatoria para nuevos usuarios" : false,
-                    
                     minLength: { value: 8, message: "La contraseña debe tener al menos 8 caracteres" }
                   })}
                   type={showPassword ? "text" : "password"}
                   className="w-full bg-[#1a1a1a] border border-gray-800 rounded-xl p-3 pl-10 pr-10 text-white outline-none focus:border-blue-500"
-
                   placeholder={isEditing ? "Dejar vacío para mantener la actual" : "Mínimo 8 caracteres"}
                 />
-                
                 <Lock className="absolute left-3 top-3.5 text-gray-500" size={18} />
-
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
@@ -184,7 +227,6 @@ const ClientForm = () => {
               </div>
               {errors.password && <span className="text-red-500 text-xs">{errors.password.message}</span>}
             </div>
-            {/* -------------------------------------- */}
 
             <div className="space-y-2">
               <label className="text-sm font-medium text-gray-300">Teléfono</label>
