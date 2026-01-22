@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Search, Plus, MoreVertical, Trash2, Shield, User } from 'lucide-react'
+import { Search, Plus, MoreVertical, Trash2, Shield, User, Pencil } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import Card from '../components/ui/Card' 
 import ConfirmModal from '../components/ConfirmModal'
@@ -147,7 +147,6 @@ const Clients = () => {
       </Card>
 
       {/* --- VISTA MÓVIL (TARJETAS) --- */}
-      {/* Esta sección solo se ve en pantallas pequeñas (sm:hidden) */}
       <div className="grid grid-cols-1 gap-4 sm:hidden">
         {filteredClients.map((client) => {
             const clientId = client._id || client.id;
@@ -170,25 +169,31 @@ const Clients = () => {
                         <p className="text-gray-300 text-sm truncate">{client.email}</p>
                     </div>
 
-                    <button 
-                        onClick={() => confirmDelete(clientId)}
-                        className="w-full py-2.5 bg-red-900/10 hover:bg-red-900/20 text-red-500 border border-red-900/20 rounded-xl flex items-center justify-center gap-2 transition-colors font-medium text-sm"
-                    >
-                        <Trash2 size={16} />
-                        Eliminar Cliente
-                    </button>
+                    <div className="flex flex-col gap-2">
+                         {/* BOTÓN EDITAR (Móvil) */}
+                         <Link 
+                            to={`/clients/new?id=${clientId}`}
+                            className="w-full py-2.5 bg-gray-800 hover:bg-gray-700 text-gray-300 border border-gray-700 rounded-xl flex items-center justify-center gap-2 transition-colors font-medium text-sm"
+                         >
+                             <Pencil size={16} />
+                             Editar Datos
+                         </Link>
+
+                         {/* BOTÓN ELIMINAR (Móvil) */}
+                         <button 
+                            onClick={() => confirmDelete(clientId)}
+                            className="w-full py-2.5 bg-red-900/10 hover:bg-red-900/20 text-red-500 border border-red-900/20 rounded-xl flex items-center justify-center gap-2 transition-colors font-medium text-sm"
+                         >
+                            <Trash2 size={16} />
+                            Eliminar Cliente
+                         </button>
+                    </div>
                 </div>
             )
         })}
-        {filteredClients.length === 0 && (
-            <div className="text-center py-8 text-gray-500">
-                No se encontraron resultados.
-            </div>
-        )}
       </div>
 
       {/* --- VISTA DESKTOP (TABLA) --- */}
-      {/* Esta sección se oculta en móviles (hidden sm:block) */}
       <Card className="hidden sm:block p-0 overflow-hidden border-gray-800 bg-[#111111]">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-sm text-gray-400"> 
@@ -234,6 +239,15 @@ const Clients = () => {
                       {openMenu === clientId && (
                         <div data-menu className="absolute right-6 mt-2 w-48 bg-[#1a1a1a] border border-gray-700 rounded-xl shadow-2xl z-50 overflow-hidden animate-in fade-in zoom-in-95 duration-100">
                            <div className="p-1">
+                               {/* OPCIÓN EDITAR (Desktop) */}
+                               <Link 
+                                 to={`/clients/new?id=${clientId}`}
+                                 className="w-full text-left px-3 py-2.5 hover:bg-gray-800 text-gray-300 hover:text-white rounded-lg transition-colors flex items-center gap-2 text-sm"
+                               >
+                                 <Pencil size={16} />
+                                 Editar
+                               </Link>
+
                                <button 
                                  onClick={() => confirmDelete(clientId)} 
                                  className="w-full text-left px-3 py-2.5 hover:bg-red-900/20 text-red-400 hover:text-red-300 rounded-lg transition-colors flex items-center gap-2 text-sm"
@@ -248,13 +262,6 @@ const Clients = () => {
                   </tr>
                 )
               })}
-              {filteredClients.length === 0 && (
-                 <tr>
-                    <td colSpan="4" className="text-center py-12 text-gray-500">
-                        No hay clientes registrados aún.
-                    </td>
-                 </tr>
-              )}
             </tbody>
           </table>
         </div>

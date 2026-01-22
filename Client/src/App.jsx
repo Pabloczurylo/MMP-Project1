@@ -1,5 +1,4 @@
 import { Routes, Route, Navigate } from 'react-router-dom'
-// import Sidebar from './components/layout/Sidebar' 
 import Dashboard from './pages/Dashboard'
 import Clients from './pages/Clients'
 import ClientForm from './pages/ClientForm'
@@ -12,34 +11,39 @@ import Login from './pages/Login'
 import ProtectedRoute from './components/ProtectedRoute' 
 import ClientRoutineDetail from './pages/ClientRoutineDetail';
 import ClientExerciseDetail from './pages/ClientExerciseDetail';
-// import { Outlet } from 'react-router-dom' <--- YA NO ES NECESARIO (lo usa MainLayout)
-
-// IMPORTAMOS TU LAYOUT EXTERNO (El que tiene el botón hamburguesa y la lógica)
 import MainLayout from './components/layout/MainLayout'; 
+import Landing from './pages/Landing'; 
 
 function App() {
   return (
     <Routes>
-      {/* 1. Ruta Pública: LOGIN */}
+      {/* --- RUTAS PÚBLICAS --- */}
+      
+      {/* La raíz ahora es la Landing Page */}
+      <Route path="/" element={<Landing />} />
+      
+      {/* Login sigue siendo público */}
       <Route path="/login" element={<Login />} />
 
-      {/* 2. Rutas Protegidas */}
+      {/* --- RUTAS PROTEGIDAS --- */}
       <Route element={<ProtectedRoute />}>
-        
-        {/* Usamos el MainLayout importado que maneja el menú responsive */}
         <Route element={<MainLayout />}>
-          <Route path="/" element={<Dashboard />} />
+          
+          {/* IMPORTANTE: El Dashboard ahora vive en '/dashboard' para no chocar con la Landing */}
+          <Route path="/dashboard" element={<Dashboard />} />
           
           {/* Clientes */}
           <Route path="/clients" element={<Clients />} />
           <Route path="/clients/new" element={<ClientForm />} />
-          <Route path="/clients/edit/:id" element={<ClientForm />} />
+          <Route path="/clients/edit/:id" element={<ClientForm />} /> {/* Recuperamos el edit que faltaba */}
 
           {/* Rutinas */}
           <Route path="/routines" element={<Routines />} />
           <Route path="/routines/new" element={<CreateRoutine />} />
           <Route path="/routines/edit/:id" element={<CreateRoutine />} />
           <Route path="/routines/:id" element={<RoutineDetail />} />
+          
+          {/* Vista Cliente */}
           <Route path="/rutina" element={<ClientRoutineDetail />} />
           <Route path="/ejercicio" element={<ClientExerciseDetail />} />
 
@@ -48,10 +52,9 @@ function App() {
           <Route path="/exercises/new" element={<ExerciseForm />} />
           <Route path="/exercises/edit/:id" element={<ExerciseForm />} />
         </Route>
-
       </Route>
 
-      {/* Redirección por defecto */}
+      {/* Redirección por defecto: Si la ruta no existe, mandamos a la Landing */}
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   )

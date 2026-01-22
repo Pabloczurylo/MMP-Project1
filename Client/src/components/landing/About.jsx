@@ -1,3 +1,5 @@
+import EripoSobreMi from '../../assets/EripoSobreMi.jpeg';
+
 const About = () => {
   return (
     <section id="sobre-mi" className="py-24 px-6 md:px-12 bg-[#0a0a0a]">
@@ -5,7 +7,7 @@ const About = () => {
         {/* Imagen del Entrenador */}
         <div className="relative h-[600px] rounded-3xl overflow-hidden shadow-2xl bg-gray-900">
           <img 
-            src="https://images.unsplash.com/photo-1583468982228-19f19164aee2?q=80&w=1974&auto=format&fit=crop" 
+            src={EripoSobreMi}
             alt="Lautaro Lencina Entrenador" 
             className="w-full h-full object-cover object-top"
           />
