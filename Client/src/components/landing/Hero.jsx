@@ -1,6 +1,11 @@
 import { Instagram, MessageCircle } from 'lucide-react'
 
 const Hero = () => {
+  // Configuración del WhatsApp
+  const phoneNumber = "5493813951473"; // Formato internacional sin +
+  const message = "Hola Lautaro, me gustaría recibir información sobre tus entrenamientos personalizados.";
+  const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`;
+
   return (
     // 1. SECCIÓN CONTENEDORA (Fondo negro, da el espacio alrededor)
     <section className="bg-[#0a0a0a] px-6 md:px-12 py-8 flex justify-center">
@@ -22,16 +27,16 @@ const Hero = () => {
         {/* Contenido (Texto y Botones) */}
         <div className="relative z-10 h-full flex flex-col justify-center px-8 md:px-16 max-w-3xl">
           <h1 className="text-5xl md:text-6xl lg:text-7xl font-extrabold tracking-tight mb-6 leading-tight text-white drop-shadow-lg">
-            Unlimited Training
+            Entrena sin limites
           </h1>
           <p className="text-lg text-gray-200 mb-10 leading-relaxed drop-shadow-md font-medium">
             ¡Bienvenido! Soy Lautaro Lencina, un entrenador personal dedicado a ayudarte a alcanzar tus metas de fitness a través de rutinas personalizadas y guía experta.
           </p>
           
           <div className="flex flex-col sm:flex-row items-start gap-4">
-            {/* Botón WhatsApp */}
+            {/* Botón WhatsApp (CORREGIDO) */}
             <a 
-              href="https://wa.me/1234567890" 
+              href={whatsappUrl}
               target="_blank"
               rel="noopener noreferrer"
               className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-bold px-6 py-3 rounded-lg transition-colors w-full sm:w-auto justify-center"
@@ -41,7 +46,7 @@ const Hero = () => {
             </a>
             {/* Botón Instagram */}
             <a 
-              href="https://instagram.com" 
+              href="https://www.instagram.com/lautyi.e/" 
               target="_blank"
               rel="noopener noreferrer"
               className="flex items-center gap-2 bg-white/10 hover:bg-white/20 text-white backdrop-blur-md border border-white/20 font-bold px-6 py-3 rounded-lg transition-colors w-full sm:w-auto justify-center"

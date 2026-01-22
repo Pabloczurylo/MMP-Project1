@@ -39,7 +39,7 @@ const Login = () => {
 
       // Guardamos en Zustand y redirigimos
       login(result.user, result.token);
-      navigate('/'); 
+      navigate('/dashboard'); 
 
     } catch (error) {
       console.error(error);
