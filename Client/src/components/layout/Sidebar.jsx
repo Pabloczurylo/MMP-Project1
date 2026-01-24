@@ -12,7 +12,7 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
   }
 
   const menuItems = [
-    { path: '/', name: 'Dashboard', icon: LayoutDashboard, adminOnly: false },
+    { path: '/dashboard', name: 'Dashboard', icon: LayoutDashboard, adminOnly: false },
     { path: '/clients', name: 'Clientes', icon: Users, adminOnly: true },
     { path: '/routines', name: 'Rutinas', icon: ClipboardList, adminOnly: true },
     { path: '/exercises', name: 'Ejercicios', icon: Dumbbell, adminOnly: true },
