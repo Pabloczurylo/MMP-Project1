@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { User, Mail, Phone, Target, FileText, Save, X, Lock, Eye, EyeOff } from 'lucide-react'
 import { Link, useNavigate, useLocation } from 'react-router-dom'
+import { API_URL } from '../config/api'
 import ConfirmModal from '../components/ConfirmModal' // <--- 1. Importar Modal
 
 const ClientForm = () => {
@@ -19,8 +20,6 @@ const ClientForm = () => {
     type: 'success', // 'success' | 'danger'
     onConfirm: null // La función a ejecutar al darle al botón azul
   })
-
-  const API_URL = 'http://localhost:3000/api/users'
   
   const queryParams = new URLSearchParams(location.search)
   const clientId = queryParams.get('id')
@@ -31,7 +30,7 @@ const ClientForm = () => {
 
     const fetchClientData = async () => {
       try {
-        const response = await fetch(`${API_URL}/`) 
+        const response = await fetch(`${API_URL}/users`) 
         const clients = await response.json()
         const client = clients.find(c => String(c._id || c.id) === String(clientId))
 

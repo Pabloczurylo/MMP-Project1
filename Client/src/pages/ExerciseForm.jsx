@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { Link, useNavigate, useParams } from 'react-router-dom' // <--- Agregamos useParams
 import { ArrowLeft, Save, Loader2, Edit } from 'lucide-react'
+import { API_URL } from '../config/api'
 import ConfirmModal from '../components/ConfirmModal'
 
 const ExerciseForm = () => {
@@ -22,10 +23,10 @@ const ExerciseForm = () => {
       const loadExercise = async () => {
         setLoadingData(true)
         try {
-          const response = await fetch(`http://localhost:3000/api/ejercicios`)
+          const response = await fetch(`${API_URL}/ejercicios`)
           const data = await response.json()
           // Como no tenemos endpoint GET /:id, buscamos en el array (solución temporal)
-          // Lo ideal sería: fetch(`http://localhost:3000/api/ejercicios/${id}`)
+          // Lo ideal sería: fetch(`${API_URL}/ejercicios/${id}`)
           const found = data.find(ex => ex._id === id)
           
           if (found) {
@@ -58,8 +59,8 @@ const ExerciseForm = () => {
     try {
       // 2. Definimos URL y Método dinámicamente
       const url = isEditing 
-        ? `http://localhost:3000/api/ejercicios/${id}` 
-        : 'http://localhost:3000/api/ejercicios'
+        ? `${API_URL}/ejercicios/${id}` 
+        : `${API_URL}/ejercicios`
       
       const method = isEditing ? 'PUT' : 'POST'
 

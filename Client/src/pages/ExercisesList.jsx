@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Search, Plus, Dumbbell, MoreHorizontal, Edit2, Trash2, RefreshCw, Loader2 } from 'lucide-react'
 import { Link, useNavigate } from 'react-router-dom' 
+import { API_URL } from '../config/api'
 import ConfirmModal from '../components/ConfirmModal'
 
 const ExercisesList = () => {
@@ -20,7 +21,7 @@ const ExercisesList = () => {
   const fetchExercises = async () => {
     setLoading(true)
     try {
-      const response = await fetch('http://localhost:3000/api/ejercicios')
+      const response = await fetch(`${API_URL}/ejercicios`)
       const data = await response.json()
       if (Array.isArray(data)) {
         setExercises(data)
@@ -50,7 +51,7 @@ const ExercisesList = () => {
     if (!deleteId) return
 
     try {
-      const response = await fetch(`http://localhost:3000/api/ejercicios/${deleteId}`, {
+      const response = await fetch(`${API_URL}/ejercicios/${deleteId}`, {
         method: 'DELETE'
       })
       

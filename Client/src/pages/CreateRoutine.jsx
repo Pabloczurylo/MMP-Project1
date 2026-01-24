@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { Link, useNavigate, useParams } from 'react-router-dom' // <--- Importamos useParams
 import { ArrowLeft, Save, Loader2, Search, CheckCircle, Circle, Edit } from 'lucide-react'
+import { API_URL } from '../config/api'
 import ConfirmModal from '../components/ConfirmModal'
 
 const CreateRoutine = () => {
@@ -26,13 +27,13 @@ const CreateRoutine = () => {
       try {
         // 1. Cargamos Usuarios, Ejercicios y (si editamos) Rutinas
         const promises = [
-          fetch('http://localhost:3000/api/users'),
-          fetch('http://localhost:3000/api/ejercicios')
+          fetch(`${API_URL}/users`),
+          fetch(`${API_URL}/ejercicios`)
         ]
         
         // Si estamos editando, traemos también las rutinas para buscar la actual
         if (isEditing) {
-           promises.push(fetch('http://localhost:3000/api/rutinas'))
+           promises.push(fetch(`${API_URL}/rutinas`))
         }
 
         const responses = await Promise.all(promises)
@@ -99,8 +100,8 @@ const CreateRoutine = () => {
 
       // 3. URL y Método dinámicos
       const url = isEditing 
-        ? `http://localhost:3000/api/rutinas/${id}`
-        : 'http://localhost:3000/api/rutinas'
+        ? `${API_URL}/rutinas/${id}`
+        : `${API_URL}/rutinas`
       
       const method = isEditing ? 'PUT' : 'POST'
 

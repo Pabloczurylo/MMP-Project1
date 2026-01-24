@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { ArrowLeft, Dumbbell, Calendar, User, Loader2 } from 'lucide-react'
+import { API_URL } from '../config/api'
 
 const RoutineDetail = () => {
   const { id } = useParams() // Obtenemos el ID de la URL
@@ -13,8 +14,8 @@ const RoutineDetail = () => {
       try {
         // 1. Cargar Rutinas y Ejercicios (En paralelo para ser rápidos)
         const [resRutinas, resEjercicios] = await Promise.all([
-          fetch('http://localhost:3000/api/rutinas'),
-          fetch('http://localhost:3000/api/ejercicios')
+          fetch(`${API_URL}/rutinas`),
+          fetch(`${API_URL}/ejercicios`)
         ])
 
         const rutinasData = await resRutinas.json()
