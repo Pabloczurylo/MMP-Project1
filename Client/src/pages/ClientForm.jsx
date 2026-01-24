@@ -3,7 +3,20 @@ import { useForm } from 'react-hook-form'
 import { User, Mail, Phone, Target, FileText, Save, X, Lock, Eye, EyeOff } from 'lucide-react'
 import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { API_URL } from '../config/api'
-import ConfirmModal from '../components/ConfirmModal' // <--- 1. Importar Modal
+import ConfirmModal from '../components/ConfirmModal'
+
+// Mapas para traducir entre Frontend y Backend
+const PLAN_MAP = {
+  perdida_peso: 'Pérdida de Peso',
+  hipertrofia: 'Hipertrofia',
+  resistencia: 'Resistencia / Cardio',
+  fuerza: 'Fuerza / Powerlifting',
+  salud: 'Salud General'
+}
+
+const REVERSE_PLAN_MAP = Object.fromEntries(
+  Object.entries(PLAN_MAP).map(([key, value]) => [value, key])
+);
 
 const ClientForm = () => {
   const { register, handleSubmit, formState: { errors }, reset } = useForm()
@@ -12,134 +25,121 @@ const ClientForm = () => {
   
   const [showPassword, setShowPassword] = useState(false)
   
-  // --- 2. Estado para manejar el Modal ---
   const [modalConfig, setModalConfig] = useState({
     isOpen: false,
     title: '',
     message: '',
-    type: 'success', // 'success' | 'danger'
-    onConfirm: null // La función a ejecutar al darle al botón azul
+    type: 'success',
+    onConfirm: null
   })
   
   const queryParams = new URLSearchParams(location.search)
   const clientId = queryParams.get('id')
   const isEditing = Boolean(clientId)
 
+  // --- 1. CARGA DE DATOS (GET /) ---
   useEffect(() => {
     if (!isEditing) return
 
     const fetchClientData = async () => {
       try {
+        // Tu ruta es router.get('/', getUsers) -> Equivale a /users
         const response = await fetch(`${API_URL}/users`) 
+        
+        if (!response.ok) throw new Error('Error al obtener usuarios')
+
         const clients = await response.json()
         const client = clients.find(c => String(c._id || c.id) === String(clientId))
 
         if (client) {
-          const reversePlan = {
-            'Pérdida de Peso': 'perdida_peso',
-            'Hipertrofia': 'hipertrofia',
-            'Resistencia / Cardio': 'resistencia',
-            'Fuerza / Powerlifting': 'fuerza',
-            'Salud General': 'salud',
-          }
-
           reset({
             fullName: client.nombre,
             email: client.email || '',
             phone: client.phone || '',
             age: client.age || '',
-            goal: reversePlan[client.plan] || 'salud',
+            goal: REVERSE_PLAN_MAP[client.plan] || 'salud',
             notes: client.notes || ''
           })
         }
       } catch (error) {
-        console.error("Error al cargar datos del cliente:", error)
+        console.error("Error:", error)
+        setModalConfig({
+            isOpen: true,
+            type: 'danger',
+            title: 'Error',
+            message: 'No se pudieron cargar los datos del cliente.',
+            onConfirm: () => navigate('/clients')
+        })
       }
     }
 
     fetchClientData()
-  }, [clientId, isEditing, reset])
+  }, [clientId, isEditing, reset, navigate])
 
+  // --- 2. GUARDAR DATOS (POST /register y PUT /:id) ---
   const onSubmit = async (data) => {
-    const planMap = {
-      perdida_peso: 'Pérdida de Peso',
-      hipertrofia: 'Hipertrofia',
-      resistencia: 'Resistencia / Cardio',
-      fuerza: 'Fuerza / Powerlifting',
-      salud: 'Salud General'
-    }
-
+    
     const clientPayload = {
       nombre: data.fullName,
       email: data.email,
       phone: data.phone,
-      age: data.age,
-      plan: planMap[data.goal],
+      age: Number(data.age), 
+      plan: PLAN_MAP[data.goal],
       notes: data.notes,
       status: 'Activo'
     }
 
     if (data.password) {
         clientPayload.password = data.password;
-    } else if (!isEditing) {
-        // Error de validación local (Usamos el modal en modo error)
-        setModalConfig({
-            isOpen: true,
-            type: 'danger',
-            title: 'Faltan datos',
-            message: 'La contraseña es obligatoria para nuevos clientes',
-            onConfirm: () => {} // No hace nada, solo cierra
-        });
-        return;
     }
 
     try {
       let response
+      
       if (isEditing) {
-        response = await fetch(`${API_URL}/${clientId}`, {
+        // EDITAR
+        response = await fetch(`${API_URL}/users/${clientId}`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(clientPayload)
         })
       } else {
-        response = await fetch(`${API_URL}/register`, {
+        // CREAR
+        
+        response = await fetch(`${API_URL}/users/register`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(clientPayload)
         })
       }
 
+      const responseData = await response.json()
+
       if (response.ok) {
-        // --- 3. ÉXITO: Mostrar Modal Verde y redirigir al confirmar ---
         setModalConfig({
             isOpen: true,
             type: 'success',
             title: isEditing ? '¡Actualización Exitosa!' : '¡Registro Exitoso!',
             message: isEditing 
-                ? 'Los datos del cliente han sido actualizados correctamente.' 
-                : 'El cliente ha sido registrado en el sistema correctamente.',
-            onConfirm: () => navigate('/clients') // <--- Aquí redirigimos
+                ? 'Datos actualizados correctamente.' 
+                : 'Cliente registrado correctamente.',
+            onConfirm: () => navigate('/clients')
         });
-
       } else {
-        // --- ERROR DE API: Mostrar Modal Rojo ---
-        const err = await response.json()
         setModalConfig({
             isOpen: true,
             type: 'danger',
-            title: 'Error al guardar',
-            message: err.message || err.error || 'No se pudo procesar la solicitud.',
+            title: 'Error',
+            message: responseData.error || 'Hubo un problema al guardar.',
             onConfirm: () => {}
         });
       }
     } catch (error) {
-      console.error(error)
-      // --- ERROR DE RED ---
       setModalConfig({
         isOpen: true,
         type: 'danger',
         title: 'Error de Conexión',
-        message: 'No se pudo conectar con el servidor. Intenta nuevamente.',
+        message: 'No se pudo conectar con el servidor.',
         onConfirm: () => {}
       });
     }
@@ -147,7 +147,6 @@ const ClientForm = () => {
 
   return (
     <div className="max-w-4xl mx-auto">
-      {/* --- 4. Renderizar el Modal --- */}
       <ConfirmModal 
         isOpen={modalConfig.isOpen}
         title={modalConfig.title}
@@ -170,6 +169,8 @@ const ClientForm = () => {
       </div>
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+        
+        {/* SECCIÓN 1: DATOS DE CUENTA */}
         <div className="bg-[#111111] p-6 rounded-2xl border border-gray-800/50">
           <h2 className="text-xl font-bold text-white mb-6 flex items-center gap-2">
             <User className="text-blue-500" size={20} />
@@ -209,11 +210,11 @@ const ClientForm = () => {
                 <input
                   {...register("password", { 
                     required: !isEditing ? "La contraseña es obligatoria para nuevos usuarios" : false,
-                    minLength: { value: 8, message: "La contraseña debe tener al menos 8 caracteres" }
+                    minLength: { value: 6, message: "Mínimo 6 caracteres" }
                   })}
                   type={showPassword ? "text" : "password"}
                   className="w-full bg-[#1a1a1a] border border-gray-800 rounded-xl p-3 pl-10 pr-10 text-white outline-none focus:border-blue-500"
-                  placeholder={isEditing ? "Dejar vacío para mantener la actual" : "Mínimo 8 caracteres"}
+                  placeholder={isEditing ? "Dejar vacío para mantener" : "Mínimo 6 caracteres"}
                 />
                 <Lock className="absolute left-3 top-3.5 text-gray-500" size={18} />
                 <button
@@ -245,12 +246,14 @@ const ClientForm = () => {
               <input
                 {...register("age")}
                 type="number"
+                min="0"
                 className="w-full bg-[#1a1a1a] border border-gray-800 rounded-xl p-3 text-white outline-none"
               />
             </div>
           </div>
         </div>
 
+        {/* SECCIÓN 2: OBJETIVOS */}
         <div className="bg-[#111111] p-6 rounded-2xl border border-gray-800/50">
           <h2 className="text-xl font-bold text-white mb-6 flex items-center gap-2">
             <Target className="text-purple-500" size={20} />
