@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useAuthStore } from '../store/useAuthStore'
 import { Calendar, Dumbbell, TrendingUp, ArrowRight } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
+import { API_URL } from '../config/api'
 
 const UserDashboard = () => {
   const { user } = useAuthStore()
@@ -14,7 +15,7 @@ const UserDashboard = () => {
       if (!user?._id) return
 
       try {
-        const res = await fetch('http://localhost:3000/api/rutinas')
+        const res = await fetch(`${API_URL}/rutinas`)
         const data = await res.json()
 
         if (Array.isArray(data)) {

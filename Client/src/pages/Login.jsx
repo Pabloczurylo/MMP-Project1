@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { User, Eye, EyeOff, Loader2, AlertCircle } from 'lucide-react'; 
 import { useNavigate } from 'react-router-dom';
+import { API_URL } from '../config/api';
 import { useAuthStore } from '../store/useAuthStore';
 
 const Login = () => {
@@ -22,7 +23,7 @@ const Login = () => {
       // ✅ CORRECCIÓN APLICADA:
       // Tu backend espera "email", pero el formulario recoge "username".
       // Aquí hacemos la traducción manual antes de enviar.
-      const response = await fetch('http://localhost:3000/api/users/login', {
+      const response = await fetch(`${API_URL}/users/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

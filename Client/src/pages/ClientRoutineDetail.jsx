@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { ArrowLeft, Dumbbell, Clock, Target, AlertCircle, Loader2 } from 'lucide-react'
+import { API_URL } from '../config/api'
 
 const ClientRoutineDetail = () => {
   const location = useLocation()
@@ -22,7 +23,7 @@ const ClientRoutineDetail = () => {
   useEffect(() => {
     const fetchExercises = async () => {
       try {
-        const res = await fetch('http://localhost:3000/api/ejercicios')
+        const res = await fetch(`${API_URL}/ejercicios`)
         const data = await res.json()
         
         if (routine?.ejerciciosIDs && Array.isArray(routine.ejerciciosIDs)) {

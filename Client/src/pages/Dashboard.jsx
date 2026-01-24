@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Users, Dumbbell, TrendingUp, Plus, Calendar, ClipboardList, Loader2 } from 'lucide-react'
 import { Link } from 'react-router-dom'
+import { API_URL } from '../config/api'
 import Card from '../components/ui/Card'
 
 // 1. IMPORTAMOS EL STORE DE AUTENTICACIÓN Y LA VISTA DE CLIENTE
@@ -44,9 +45,9 @@ const Dashboard = () => {
 
       try {
         const [resUsers, resRoutines, resExercises] = await Promise.all([
-          fetch('http://localhost:3000/api/users'),
-          fetch('http://localhost:3000/api/rutinas'),
-          fetch('http://localhost:3000/api/ejercicios')
+          fetch(`${API_URL}/users`),
+          fetch(`${API_URL}/rutinas`),
+          fetch(`${API_URL}/ejercicios`)
         ])
         const users = await resUsers.json()
         const routines = await resRoutines.json()

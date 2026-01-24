@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Search, Plus, MoreVertical, Trash2, Shield, User, Pencil } from 'lucide-react'
 import { Link } from 'react-router-dom'
+import { API_URL } from '../config/api'
 import Card from '../components/ui/Card' 
 import ConfirmModal from '../components/ConfirmModal'
 
@@ -19,13 +20,11 @@ const Clients = () => {
     onConfirm: null
   })
 
-  const API_URL = 'http://localhost:3000/api/users'
-
   // Cargar clientes
   useEffect(() => {
     const fetchClients = async () => {
       try {
-        const response = await fetch(`${API_URL}/`) 
+        const response = await fetch(`${API_URL}/users`) 
         if (!response.ok) throw new Error('Error al obtener clientes')
         const data = await response.json()
         setClients(data)

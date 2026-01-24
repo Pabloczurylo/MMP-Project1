@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Search, Plus, ClipboardList, MoreHorizontal, Trash2, Edit2, Loader2, RefreshCw, Eye } from 'lucide-react'
 import { Link, useNavigate } from 'react-router-dom' // <--- 1. Importar useNavigate
+import { API_URL } from '../config/api'
 import ConfirmModal from '../components/ConfirmModal'
 
 const Routines = () => {
@@ -18,7 +19,7 @@ const Routines = () => {
   const fetchRoutines = async () => {
     setLoading(true)
     try {
-      const response = await fetch('http://localhost:3000/api/rutinas')
+      const response = await fetch(`${API_URL}/rutinas`)
       const data = await response.json()
       if (Array.isArray(data)) setRoutines(data)
     } catch (error) {
@@ -42,7 +43,7 @@ const Routines = () => {
     if (!routineToDelete) return
 
     try {
-      const response = await fetch(`http://localhost:3000/api/rutinas/${routineToDelete}`, {
+      const response = await fetch(`${API_URL}/rutinas/${routineToDelete}`, {
         method: 'DELETE'
       })
       if (response.ok) {
