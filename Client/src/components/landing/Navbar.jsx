@@ -14,7 +14,7 @@ const Navbar = () => {
         <div className="hidden md:flex items-center gap-8 text-sm font-medium text-gray-300">
           <a href="#servicios" className="hover:text-white transition-colors">Servicios</a>
           <a href="#sobre-mi" className="hover:text-white transition-colors">Sobre Mí</a>
-          <a href="#testimonios" className="hover:text-white transition-colors">Testimonios</a>
+          <a href="#testimonios" className="hover:text-white transition-colors"></a>
         </div>
 
         {/* Botón de Contacto */}
