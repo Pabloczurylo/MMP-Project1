@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { User, Eye, EyeOff, Loader2, AlertCircle } from 'lucide-react'; 
-import { useNavigate } from 'react-router-dom';
+import { User, Eye, EyeOff, Loader2, AlertCircle, ArrowLeft } from 'lucide-react'; 
+import { useNavigate, Link } from 'react-router-dom'; 
 import { API_URL } from '../config/api';
 import { useAuthStore } from '../store/useAuthStore';
 
@@ -20,14 +20,11 @@ const Login = () => {
     setServerError(''); 
 
     try {
-      // ✅ CORRECCIÓN APLICADA:
-      // Tu backend espera "email", pero el formulario recoge "username".
-      // Aquí hacemos la traducción manual antes de enviar.
       const response = await fetch(`${API_URL}/users/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          email: data.username, // Enviamos el valor del input como 'email'
+          email: data.username, 
           password: data.password
         }), 
       });
@@ -38,7 +35,6 @@ const Login = () => {
         throw new Error(result.message || 'Credenciales incorrectas');
       }
 
-      // Guardamos en Zustand y redirigimos
       login(result.user, result.token);
       navigate('/dashboard'); 
 
@@ -51,8 +47,21 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a] text-white flex flex-col items-center justify-start pt-12 px-4 font-sans animate-in fade-in duration-500">
+    //  'relative' para que el botón absoluto se posicione respecto a este contenedor
+    <div className="min-h-screen bg-[#0a0a0a] text-white flex flex-col items-center justify-start pt-12 px-4 font-sans animate-in fade-in duration-500 relative">
       
+      
+      <div className="absolute top-6 left-6">
+        <Link 
+          to="/" 
+          className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors p-2 rounded-lg hover:bg-white/10 group"
+        >
+          <ArrowLeft size={20} className="group-hover:-translate-x-1 transition-transform" />
+          <span className="font-medium hidden sm:inline">Volver al Inicio</span>
+        </Link>
+      </div>
+      
+
       {/* Header */}
       <header className="mb-32">
         <h2 className="text-sm font-bold tracking-[0.2em] uppercase text-blue-500">
