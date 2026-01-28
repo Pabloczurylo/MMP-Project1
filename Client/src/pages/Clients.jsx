@@ -66,7 +66,8 @@ const Clients = () => {
 
   const executeDelete = async (id) => {
     try {
-      const response = await fetch(`${API_URL}/${id}`, { 
+      // CORRECCIÓN: Agregamos "/users" antes del ID
+      const response = await fetch(`${API_URL}/users/${id}`, { 
         method: 'DELETE'
       })
 
